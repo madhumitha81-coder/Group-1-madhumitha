@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Signed Out</title>
+    <style>
+        body {
+            background: #1d2671;
+            font-family: sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            margin: 0;
+        }
+        .msg-box {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 50px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        a {
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid #fff;
+            padding: 10px 25px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        a:hover { background: white; color: #1d2671; }
+    </style>
+</head>
+<body>
+    <div class="msg-box">
+        <h2>Successfully Logged Out</h2>
+        <p>Thank you for using TalentLink. See you soon!</p>
+        <a href="{% url 'login' %}">Login Again</a>
+    </div>
+</body>
+</html>

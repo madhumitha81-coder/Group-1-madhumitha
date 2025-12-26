@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, {{ request.user.username }}!</h1>
+    <a href="{% url 'logout' %}">Logout</a>
+    <hr>
+
+    <h2>Users:</h2>
+    <ul>
+        {% for user in users %}
+            <li>{{ user.username }} ({{ user.email }})</li>
+        {% empty %}
+            <li>No users found.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Profiles:</h2>
+    <ul>
+        {% for profile in profiles %}
+            <li>{{ profile.user.username }} - {{ profile.phone }} - {{ profile.address }}</li>
+        {% empty %}
+            <li>No profiles found.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Freelancer Profiles:</h2>
+    <ul>
+        {% for fp in freelancer_profiles %}
+            <li>{{ fp.user.username }} - Experience: {{ fp.experience }} - Skills: 
+                {% for skill in fp.skills.all %} {{ skill.name }} {% endfor %}
+            </li>
+        {% empty %}
+            <li>No freelancer profiles.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Skills:</h2>
+    <ul>
+        {% for skill in skills %}
+            <li>{{ skill.name }}</li>
+        {% empty %}
+            <li>No skills.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Projects:</h2>
+    <ul>
+        {% for project in projects %}
+            <li>{{ project.title }} - {{ project.status }}</li>
+        {% empty %}
+            <li>No projects.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Proposals:</h2>
+    <ul>
+        {% for proposal in proposals %}
+            <li>{{ proposal.project.title }} - {{ proposal.freelancer.user.username }} - Amount: {{ proposal.amount }}</li>
+        {% empty %}
+            <li>No proposals.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Contracts:</h2>
+    <ul>
+        {% for contract in contracts %}
+            <li>{{ contract.project.title }} - Freelancer: {{ contract.freelancer.user.username }} - Client: {{ contract.client.username }}</li>
+        {% empty %}
+            <li>No contracts.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Messages:</h2>
+    <ul>
+        {% for message in messages %}
+            <li>From: {{ message.sender.username }} To: {{ message.receiver.username }} - {{ message.content }}</li>
+        {% empty %}
+            <li>No messages.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Reviews:</h2>
+    <ul>
+        {% for review in reviews %}
+            <li>Project: {{ review.project.title }} - Reviewer: {{ review.reviewer.username }} - Rating: {{ review.rating }} - {{ review.comment }}</li>
+        {% empty %}
+            <li>No reviews.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

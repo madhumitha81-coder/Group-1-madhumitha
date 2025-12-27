@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to TalentLink</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #1d2671 0%, #2575fc 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        .hero-container {
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 { font-size: 48px; margin-bottom: 10px; }
+        p { font-size: 18px; margin-bottom: 30px; opacity: 0.9; }
+        .btn-group { display: flex; gap: 20px; justify-content: center; }
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-login { background: white; color: #1d2671; }
+        .btn-register { background: #4ade80; color: #103e3e; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body>
+    <div class="hero-container">
+        <h1>TalentLink</h1>
+        <p>The ultimate connection for freelancers and clients.</p>
+        <div class="btn-group">
+            <a href="{% url 'login' %}" class="btn btn-login">Login to Admin</a>
+            <a href="{% url 'register' %}" class="btn btn-register">Join Community</a>
+        </div>
+    </div>
+</body>
+</html>

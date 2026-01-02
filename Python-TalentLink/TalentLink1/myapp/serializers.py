@@ -19,15 +19,12 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProjectSerializer(serializers.ModelSerializer):
-    skills_required = SkillSerializer(many=True, read_only=True)
+   
     class Meta:
         model = Project
         fields = '__all__'
 
-class ProposalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Proposal
-        fields = '__all__'
+
 
 class ContractSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,4 +39,10 @@ class MessageSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
+        fields = '__all__'
+class ProposalSerializer(serializers.ModelSerializer):
+    freelancer = serializers.ReadOnlyField(source='freelancer.username')
+
+    class Meta:
+        model = Proposal
         fields = '__all__'

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Create Project</title>
+<style>
+body {
+    background: linear-gradient(135deg, #0f1117, #1e293b);
+    font-family: "Segoe UI", sans-serif;
+    color: #e5e7eb;
+    padding: 40px;
+}
+
+.form-box {
+    max-width: 650px;
+    margin: auto;
+    background: #0f172a;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #60a5fa;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 8px;
+    border: none;
+    background: #1e293b;
+    color: #e5e7eb;
+    font-size: 14px;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.btn {
+    background: #22c55e;
+    color: #022c22;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    font-size: 15px;
+    margin-top: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: #16a34a;
+}
+
+label {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 10px;
+    display: block;
+}
+</style>
+</head>
+
+<body>
+<div class="form-box">
+<h2>Create Project</h2>
+
+<form method="post">
+  {% csrf_token %}
+
+  <label for="title">Project Title</label>
+  <input name="title" placeholder="Project Title" required>
+
+  <label for="description">Project Description</label>
+  <textarea name="description" placeholder="Project Description"></textarea>
+
+  <label for="budget">Budget (₹)</label>
+  <input name="budget" placeholder="Budget">
+
+  <label for="skills_required">Skills Required</label>
+  <input name="skills_required" placeholder="e.g. Java, Python, SQL, DevOps">
+
+  <label for="duration">Duration (in days)</label>
+  <input name="duration" type="number" placeholder="Duration">
+
+  <label for="deadline">Deadline</label>
+  <input name="deadline" type="date">
+
+  <button class="btn">Create Project</button>
+</form>
+</div>
+</body>
+</html>

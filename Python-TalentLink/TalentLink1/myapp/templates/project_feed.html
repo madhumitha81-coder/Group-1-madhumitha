@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Projects</title>
+<style>
+body{background:#0f2027;color:#fff;font-family:Segoe UI;padding:40px;}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
+.card{
+  background:#1f3b3b;
+  padding:20px;
+  border-radius:12px;
+}
+.btn{
+  background:#4ecdc4;
+  padding:8px 14px;
+  border-radius:6px;
+  text-decoration:none;
+  color:#003333;
+  display:inline-block;
+  margin-top:8px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Available Projects</h2>
+
+<div class="grid">
+{% for project in projects %}
+  <div class="card">
+    <h3>{{ project.title }}</h3>
+    <p>{{ project.description|truncatechars:80 }}</p>
+    <a href="/project/{{ project.id }}/" class="btn">Project Details</a>
+    <a href="/project/{{ project.id }}/proposal/" class="btn">Submit Proposal</a>
+  </div>
+{% endfor %}
+</div>
+
+</body>
+</html>

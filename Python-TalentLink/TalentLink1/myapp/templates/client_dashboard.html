@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Client Dashboard</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f1117, #1e293b);
+            font-family: "Segoe UI", sans-serif;
+            margin: 0;
+            color: #e5e7eb;
+        }
+
+        .navbar {
+            background: #0f172a;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .logout-btn, .create-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .logout-btn { background: #ef4444; color: #020617; }
+        .create-btn { background: #22c55e; color: #022c22; }
+
+        .container { max-width: 1000px; margin: 30px auto; }
+
+        .search-bar {
+            width: 100%;
+            padding: 14px 18px;
+            margin-bottom: 25px;
+            border-radius: 14px;
+            border: none;
+            font-size: 15px;
+            background: #020617;
+            color: #e5e7eb;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+            outline: none;
+        }
+
+        .project-card {
+            background: #0f172a;
+            padding: 22px;
+            border-radius: 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.45);
+        }
+
+        .label { font-size: 13px; color: #94a3b8; margin-bottom: 2px; }
+        .value { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+        .desc { color: #c7d2fe; margin-bottom: 12px; line-height: 1.5; }
+        .meta { font-size: 12px; color: #a5b4fc; margin-bottom: 6px; }
+
+        .skills span {
+            display: inline-block;
+            background: #1e40af;
+            color: #dbeafe;
+            padding: 5px 10px;
+            border-radius: 14px;
+            font-size: 12px;
+            margin: 3px 4px 3px 0;
+        }
+
+        .actions a, .proposal-actions button {
+            display: inline-block;
+            margin-top: 10px;
+            margin-right: 10px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .view { background: #22c55e; color: #022c22; }
+        .edit { background: #facc15; color: #3b2f0b; }
+        .delete { background: #ef4444; color: #020617; }
+
+        .proposal-card {
+            background: #1e293b;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .proposal-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .accepted { background: #22c55e; color: #022c22; }
+        .rejected { background: #ef4444; color: #020617; }
+        .pending { background: #facc15; color: #3b2f0b; }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Welcome, {{ request.user.username }}</h2>
+    <div>
+        <a href="{% url 'create_project' %}" class="create-btn">Create Project</a>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- 🔍 Search Bar -->
+    <input
+        type="text"
+        id="projectSearch"
+        class="search-bar"
+        placeholder="Search project by title..."
+        onkeyup="searchProjects()"
+    >
+
+    {% for project in projects %}
+    <div class="project-card project-item">
+
+        <div class="label">Title</div>
+        <div class="value project-title">{{ project.title }}</div>
+
+        <div class="label">Description</div>
+        <div class="desc">{{ project.description }}</div>
+
+        <div class="label">Budget</div>
+        <div class="value">₹ {{ project.budget }}</div>
+
+        <div class="label">Deadline</div>
+        <div class="value">{{ project.deadline }}</div>
+
+        <div class="label">Skills</div>
+        <div class="skills">
+            {% for skill in project.skills_required.all %}
+                <span>{{ skill.name }}</span>
+            {% empty %}
+                <span>Not specified</span>
+            {% endfor %}
+        </div>
+
+        <div class="meta">Created: {{ project.created_at }}</div>
+        <div class="meta">Updated: {{ project.updated_at }}</div>
+
+        <div class="actions">
+            <a href="{% url 'project_detail' project.id %}" class="view">View</a>
+            <a href="{% url 'update_project' project.id %}" class="edit">Update</a>
+            <form method="post" action="{% url 'delete_project' project.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="delete">Delete</button>
+            </form>
+        </div>
+
+        <h4>Proposals:</h4>
+        {% for proposal in project.proposals.all %}
+        <div class="proposal-card">
+            <p><strong>Freelancer:</strong> {{ proposal.freelancer.user.username }}</p>
+            <p><strong>Cover Letter:</strong> {{ proposal.cover_letter }}</p>
+            <p><strong>Bid:</strong> ₹{{ proposal.bid_amount }}</p>
+
+            <span class="proposal-status {{ proposal.status|lower }}">
+                {{ proposal.status }}
+            </span>
+        </div>
+        {% empty %}
+            <p>No proposals yet.</p>
+        {% endfor %}
+
+    </div>
+    {% empty %}
+        <p>No projects posted yet.</p>
+    {% endfor %}
+
+</div>
+
+<script>
+function searchProjects() {
+    const input = document.getElementById("projectSearch").value.toLowerCase();
+    const projects = document.getElementsByClassName("project-item");
+
+    for (let i = 0; i < projects.length; i++) {
+        const title = projects[i]
+            .getElementsByClassName("project-title")[0]
+            .innerText.toLowerCase();
+
+        projects[i].style.display = title.includes(input) ? "" : "none";
+    }
+}
+</script>
+
+</body>
+</html>

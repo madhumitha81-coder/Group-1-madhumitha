@@ -1,383 +1,357 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from rest_framework import viewsets, generics, permissions
-from rest_framework.permissions import IsAuthenticated
-from .models import Profile, Project, Proposal
-from .serializers import ProjectSerializer, ProposalSerializer
-from .forms import ProjectForm, LoginForm
-
-# ------------------- AUTHENTICATION ------------------
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-
-from rest_framework import viewsets, generics, permissions
-from rest_framework.permissions import IsAuthenticated
-
-from .models import Profile, Project, Proposal
-from .serializers import ProjectSerializer, ProposalSerializer
-from .forms import LoginForm
-
-
-# ------------------- AUTH -------------------
-
-from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from django.contrib import messages
-from .models import Profile
+from django.http import HttpResponseForbidden
 
+from .models import Profile, Project, Proposal, Contract, Message
+from .forms import ProjectForm
+from .decorators import client_required, freelancer_required
+
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from .serializers import ProjectSerializer, ProposalSerializer
+
+# ---------------- REGISTER ----------------
 def register_view(request):
     if request.method == "POST":
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        role = request.POST.get('role')  # 'client' or 'freelancer'
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        role = request.POST.get("role")  # client / freelancer
 
         if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists!")
-            return redirect('register')
+            messages.error(request, "Username already exists")
+            return redirect("register")
 
-        # Create the user
+        # Create user
         user = User.objects.create_user(username=username, password=password)
+        profile = user.profile
+        profile.role = role if role in ['client', 'freelancer'] else 'client'
+        profile.save()
 
-        # Only create Profile if it doesn't exist
-        if not hasattr(user, 'profile'):
-            Profile.objects.create(user=user, role=role)
-
-        messages.success(request, "Registration successful! Please login.")
-        return redirect('login')  # Redirect to login page
-
-    return render(request, 'register.html')
+        messages.success(request, "Registered successfully")
+        return redirect("login")
+    return render(request, "register.html")
 
 
+# ---------------- LOGIN / LOGOUT ----------------
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('root')
-
     if request.method == 'POST':
-        form = LoginForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user:
             login(request, user)
             return redirect('root')
-    else:
-        form = LoginForm()
-
-    return render(request, 'login.html', {'form': form})
+        else:
+            messages.error(request, "Invalid credentials")
+    return render(request, 'login.html')
 
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect("login")
 
 
-# ------------------- ROOT -------------------
-
+# ---------------- ROOT REDIRECT ----------------
+@login_required
 def root_redirect(request):
-    if request.user.is_authenticated:
-        if request.user.profile.role == 'client':
-            return redirect('client_dashboard')
-        return redirect('freelancer_dashboard')
-    return redirect('login')
+    role = request.user.profile.role
+    if role == 'client':
+        return redirect('client_dashboard')
+    return redirect('freelancer_dashboard')
 
 
-# ------------------- CLIENT -------------------
+# ---------------- DASHBOARDS ----------------
+@client_required
+def client_dashboard(request):
+    profile = request.user.profile
+    projects = request.user.project_set.all()  # all projects by this client
+    contracts = profile.client_contracts.all()  # fetch contracts related to client
+
+    context = {
+        'projects': projects,
+        'contracts': contracts
+    }
+    return render(request, 'client_dashboard.html', context)
 
 
-   
+
+from django.db.models import Q
+from .models import Project, Contract
+
+def freelancer_dashboard(request):
+    q = request.GET.get('q', '').strip()
+
+    projects = Project.objects.all()
+
+    if q:
+        projects = projects.filter(
+            Q(title__icontains=q) |
+            Q(description__icontains=q) |
+            Q(client__username__icontains=q)
+        )
+
+    contracts = Contract.objects.filter(freelancer__user=request.user)
+
+    return render(request, "freelancer_dashboard.html", {
+        "projects": projects,
+        "contracts": contracts
+    })
 
 
+
+# ---------------- PROJECT DETAIL ----------------
+@login_required
+def project_detail(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    profile = request.user.profile
+    is_client = profile.role == "client"
+
+    proposals = Proposal.objects.filter(project=project) if is_client else None
+    user_proposal = None
+    if not is_client:
+        user_proposal = Proposal.objects.filter(project=project, freelancer=profile).first()
+
+    context = {
+        "project": project,
+        "is_client": is_client,
+        "proposals": proposals,
+        "user_proposal": user_proposal
+    }
+    return render(request, "project_detail.html", context)
+
+
+# ---------------- CREATE / UPDATE PROJECT ----------------
 @login_required
 def create_project(request):
-    if request.method == 'POST':
-        Project.objects.create(
-            client=request.user,
-            title=request.POST['title'],
-            description=request.POST['description'],
-            budget=request.POST['budget'],
-            duration=request.POST['duration'],
-            deadline=request.POST['deadline']
-        )
-        return redirect('client_dashboard')
+    if request.method == "POST":
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.client = request.user
+            project.save()
+            form.save()  # saves M2M fields
+            return redirect("client_dashboard")
+    else:
+        form = ProjectForm()
+    return render(request, "create_project.html", {"form": form})
 
-    return render(request, 'create_project.html')
-
-
-
-
-from django.contrib.auth.decorators import login_required
-from .models import Project
-from .forms import ProjectForm
-from django.contrib import messages
 
 @login_required
 def update_project(request, pk):
-    # Get the project, ensure only the owner can update
     project = get_object_or_404(Project, pk=pk, client=request.user)
-
     if request.method == "POST":
         form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
             form.save()
-            messages.success(request, "Project updated successfully!")
-            return redirect('client_dashboard')  # Redirect to client dashboard
-        else:
-            messages.error(request, "Please correct the errors below.")
+            return redirect("project_detail", project_id=project.pk)  # ✅ correct
     else:
         form = ProjectForm(instance=project)
-
-    context = {
-        'form': form,
-        'project': project
-    }
-    return render(request, 'update_project.html', context)
+    return render(request, "update_project.html", {"form": form, "project": project})
 
 
+# ---------------- DELETE PROJECT ----------------
 @login_required
+@client_required
 def delete_project(request, pk):
-    project = get_object_or_404(Project, id=pk)
-
-    if request.method == 'POST':
-        project.delete()
-        return redirect('client_dashboard')
-
- 
-
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Project, Proposal, Profile
-
-# ---------------- Client Dashboard ----------------
-
-# ---------------- Project Detail ----------------
-
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Project, Proposal, Profile
-
-@login_required
-def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    # Check if current user is the client
-    is_client = request.user == project.client  # <-- fixed
+    # Fix: Compare with profile, not user
+    
+    if request.method == "POST":
+        project.delete()
+        messages.success(request, "Project deleted successfully!")
+        return redirect('client_dashboard')
 
-    # Get all proposals if client
-    proposals = project.proposals.all() if is_client else None
+    # For GET request, just redirect back
+    return redirect('client_dashboard')
 
-    # Check if freelancer has already submitted
-    has_submitted = False
-    if not is_client:
-        profile = get_object_or_404(Profile, user=request.user)
-        has_submitted = Proposal.objects.filter(project=project, freelancer=profile).exists()
-
-    context = {
-        'project': project,
-        'is_client': is_client,
-        'proposals': proposals,
-        'has_submitted': has_submitted,
-    }
-    return render(request, 'project_detail.html', context)
-
-
-# ---------------- Accept Proposal ----------------
-
-
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Proposal
-
-
-@login_required
-def accept_proposal(request, pk):
-    proposal = get_object_or_404(Proposal, pk=pk)
-
-    # Only project owner can accept
-    if proposal.project.client != request.user:
-        return redirect('project_detail', proposal.project.pk)
-
-    proposal.status = "ACCEPTED"
-    proposal.save()
-
-    return redirect('project_detail', proposal.project.pk)
-
-
-@login_required
-def reject_proposal(request, pk):
-    proposal = get_object_or_404(Proposal, pk=pk)
-
-    # Only project owner can reject
-    if proposal.project.client != request.user:
-        return redirect('project_detail', proposal.project.pk)
-
-    proposal.status = "REJECTED"
-    proposal.save()
-
-    return redirect('project_detail', proposal.project.pk)
-
-
-from django.utils import timezone
-
-# ---------------- CLIENT DASHBOARD ----------------
-@login_required
-def client_dashboard(request):
-    projects = Project.objects.filter(client=request.user)
-    return render(request, "client_dashboard.html", {
-        "projects": projects
-    })
-
-# ---------------- FREELANCER DASHBOARD ----------------
-
-@login_required
-def freelancer_dashboard(request):
-    profile = Profile.objects.get(user=request.user)
-
-    projects = Project.objects.all().select_related('client')
-
-    # Attach freelancer's proposal directly to each project
-    for project in projects:
-        project.user_proposal = Proposal.objects.filter(
-            project=project,
-            freelancer=profile
-        ).first()
-
-    context = {
-        'projects': projects
-    }
-    return render(request, 'freelancer_dashboard.html', context)
-
-# ---------------- SUBMIT PROPOSAL ----------------
+# ---------------- PROPOSAL ----------------
 @login_required
 def submit_proposal(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
+    project = get_object_or_404(Project, pk=project_id)
+    freelancer_profile = request.user.profile
 
-    # Ensure the user is a freelancer
-    freelancer_profile = get_object_or_404(Profile, user=request.user, role='freelancer')
+    if freelancer_profile.role != "freelancer":
+        return redirect('root')
 
-    # Check if a proposal already exists
-    existing_proposal = Proposal.objects.filter(project=project, freelancer=freelancer_profile).first()
-    if existing_proposal:
-        messages.warning(request, "You have already submitted a proposal for this project.")
-        return redirect('freelancer_dashboard')
-
-    if request.method == 'POST':
-        bid_amount = request.POST.get('bid_amount')
-        cover_letter = request.POST.get('cover_letter', '')
-
-        # Create proposal
-        proposal = Proposal.objects.create(
-            project=project,
-            freelancer=freelancer_profile,
-            bid_amount=bid_amount,
-            cover_letter=cover_letter,
-            status='pending',
-            created_at=timezone.now()
-        )
-        messages.success(request, "Proposal submitted successfully!")
-        return redirect('freelancer_dashboard')
-
-    # fallback redirect
-    return redirect('freelancer_dashboard')
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Project, Proposal, Profile
-
-def submit_proposal(request, pk):  # pk from URL
-    project = get_object_or_404(Project, id=pk)
-    
     if request.method == "POST":
         cover_letter = request.POST.get("cover_letter")
         bid_amount = request.POST.get("bid_amount")
 
-        freelancer_profile = Profile.objects.get(user=request.user)
-
-        Proposal.objects.create(
-            project=project,
-            freelancer=freelancer_profile,
-            cover_letter=cover_letter,
-            bid_amount=bid_amount,  # <-- Correct field
-            status="PENDING"
-        )
-
-        return redirect("freelancer_dashboard")  # Redirect after submission
+        existing = Proposal.objects.filter(project=project, freelancer=freelancer_profile).first()
+        if existing:
+            existing.cover_letter = cover_letter
+            existing.bid_amount = bid_amount
+            existing.status = "PENDING"
+            existing.save()
+        else:
+            Proposal.objects.create(
+                project=project,
+                freelancer=freelancer_profile,
+                cover_letter=cover_letter,
+                bid_amount=bid_amount,
+                status="PENDING"
+            )
+        return redirect("project_detail", project_id=project.id)
 
     return render(request, "submit_proposal.html", {"project": project})
 
 
-        
 
 
-# ------------------- ROOT REDIRECT -------------------
+def accept_proposal(request, proposal_id):
+    proposal = get_object_or_404(Proposal, id=proposal_id)
 
-def root_redirect(request):
-    if request.user.is_authenticated:
-        if hasattr(request.user, 'profile'):
-            if request.user.profile.role == 'client':
-                return redirect('client_dashboard')
-            else:
-                return redirect('freelancer_dashboard')
-    return redirect('login')
+    if request.method == "POST" and request.user == proposal.project.client:
+        # Update proposal status
+        proposal.status = 'accepted'
+        proposal.save()
+
+        # Create a Contract
+        Contract.objects.create(
+            project=proposal.project,
+            proposal=proposal,
+            client=proposal.project.client.profile,
+            freelancer=proposal.freelancer,
+            status='PENDING'
+        )
+
+        return redirect('client_dashboard')  # or your dashboard URL
+
+@login_required
+def reject_proposal(request, proposal_id):
+    proposal = get_object_or_404(Proposal, id=proposal_id)
+    if proposal.project.client != request.user:
+        return redirect("client_dashboard")
+    proposal.status = "REJECTED"
+    proposal.save()
+    return redirect("project_detail", project_id=proposal.project.pk)
 
 
-# ------------------- DRF API VIEWS -------------------
-class ProjectListAPIView(generics.ListAPIView):
-    queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
+@login_required
 
-class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
+
+# ---------------- ACCEPT / REJECT PROPOSAL ----------------
+@login_required
+def update_proposal_status(request, proposal_id):
+    proposal = get_object_or_404(Proposal, id=proposal_id)
+    project = proposal.project
+
+    if request.user != project.client:
+        return redirect('client_dashboard')  # Only client can accept/reject
+
+    if request.method == "POST":
+        status = request.POST.get("status").upper()
+        proposal.status = status
+        proposal.save()
+
+        # If accepted → create contract
+        if status == "ACCEPTED":
+            Contract.objects.create(
+                project=project,
+                proposal=proposal,
+                client=project.client.profile,
+                freelancer=proposal.freelancer,
+                status="PENDING"
+            )
+        return redirect('client_dashboard')
+
+
+# ---------------- CONTRACT CHAT ----------------
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Contract, Message
+
+@login_required
+def contract_chat(request, contract_id):
+    contract = get_object_or_404(Contract, id=contract_id)
+
+    # Use session to track cleared messages per user
+    if 'cleared_messages' not in request.session:
+        request.session['cleared_messages'] = {}
+
+    cleared = request.session['cleared_messages'].get(str(contract.id), [])
+
+    # Exclude cleared messages
+    messages = contract.messages.exclude(id__in=cleared).order_by('timestamp')
+
+    # Handle sending messages
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        uploaded_file = request.FILES.get('file')
+
+        if content or uploaded_file:
+            Message.objects.create(
+                contract=contract,
+                sender=request.user.profile,
+                content=content if content else '',
+                file=uploaded_file if uploaded_file else None
+            )
+        return redirect('contract_chat', contract_id=contract.id)
+
+    # Prepare messages for template
+    msg_list = []
+    for msg in messages:
+        # Detect if file is an image
+        is_image = False
+        if msg.file:
+            if msg.file.name.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                is_image = True
+
+        msg_list.append({
+            'id': msg.id,
+            'sender': msg.sender.user.username,
+            'sender_role': msg.sender.role,
+            'content': msg.content,
+            'timestamp': msg.timestamp,
+            'file': msg.file,
+            'is_image': is_image
+        })
+
+    context = {
+        'contract': contract,
+        'messages': msg_list
+    }
+    return render(request, 'contract_chat.html', context)
+
+
+@login_required
+def clear_contract_chat(request, contract_id):
+    contract = get_object_or_404(Contract, id=contract_id)
+
+    # Mark all messages as cleared for this user in session
+    if 'cleared_messages' not in request.session:
+        request.session['cleared_messages'] = {}
+
+    request.session['cleared_messages'][str(contract.id)] = list(
+        contract.messages.values_list('id', flat=True)
+    )
+    request.session.modified = True
+
+    return redirect('contract_chat', contract_id=contract.id)
 
 
 class ProposalViewSet(viewsets.ModelViewSet):
     queryset = Proposal.objects.all()
     serializer_class = ProposalSerializer
     permission_classes = [IsAuthenticated]
+from rest_framework import viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import Project
+from .serializers import ProjectSerializer
+from .filters import ProjectFilter
 
-
-class ClientProjectListCreateAPIView(generics.ListCreateAPIView):
-    serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Project.objects.filter(client=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(client=self.request.user)
-
-
-class ClientProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Project.objects.filter(client=self.request.user)
-
-
-class FreelancerProjectListAPIView(generics.ListAPIView):
+class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-
-class SubmitProposalAPIView(generics.CreateAPIView):
-    serializer_class = ProposalSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(freelancer=self.request.user)
-
-
-class ProposalUpdateAPIView(generics.UpdateAPIView):
-    queryset = Proposal.objects.all()
-    serializer_class = ProposalSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
+    filterset_class = ProjectFilter      # ✅ Use custom filterset
+    ordering_fields = ['created_at', 'budget', 'deadline']
+    ordering = ['-created_at']
+    search_fields = ['title', 'description']

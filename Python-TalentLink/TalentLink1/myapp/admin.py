@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, Project, Proposal, Contract, Message, Review, Profile, Skill  # remove Freelancer
+from .models import Task, Project, Proposal, Contract, Message, Review, Profile, Skill
 
 admin.site.register(Task)
 admin.site.register(Project)

@@ -1,100 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Create Project</title>
-<style>
-body {
-    background: linear-gradient(135deg, #0f1117, #1e293b);
-    font-family: "Segoe UI", sans-serif;
-    color: #e5e7eb;
-    padding: 40px;
-}
+    <title>Create Project</title>
+    <style>
+        body {
+            background: linear-gradient(135deg,#0f1117,#1e293b);
+            font-family: "Segoe UI", sans-serif;
+            color: #e5e7eb;
+            padding: 40px;
+        }
 
-.form-box {
-    max-width: 650px;
-    margin: auto;
-    background: #0f172a;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
+        h2 {
+            text-align: center;
+            color: #22c55e;
+            margin-bottom: 25px;
+        }
 
-h2 {
-    text-align: center;
-    margin-bottom: 24px;
-    color: #60a5fa;
-}
+        .form-container {
+            max-width: 650px;
+            margin: auto;
+            background: #0f172a;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
 
-input, textarea {
-    width: 100%;
-    padding: 12px;
-    margin: 12px 0;
-    border-radius: 8px;
-    border: none;
-    background: #1e293b;
-    color: #e5e7eb;
-    font-size: 14px;
-}
+        .form-group {
+            margin-bottom: 18px;
+        }
 
-textarea {
-    min-height: 100px;
-    resize: vertical;
-}
+        label {
+            display: block;
+            font-weight: bold;
+            color: #c7d2fe;
+            margin-bottom: 6px;
+        }
 
-.btn {
-    background: #22c55e;
-    color: #022c22;
-    padding: 12px 18px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    font-size: 15px;
-    margin-top: 12px;
-    transition: all 0.3s ease;
-}
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+        }
 
-.btn:hover {
-    background: #16a34a;
-}
+        textarea { resize: vertical; }
 
-label {
-    font-size: 13px;
-    color: #94a3b8;
-    margin-top: 10px;
-    display: block;
-}
-</style>
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            background: #22c55e;
+            color: #020617;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover { background: #16a34a; }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            color: #4ecdc4;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
 </head>
-
 <body>
-<div class="form-box">
+
 <h2>Create Project</h2>
 
-<form method="post">
-  {% csrf_token %}
+<div class="form-container">
+    <form method="post">
+        {% csrf_token %}
 
-  <label for="title">Project Title</label>
-  <input name="title" placeholder="Project Title" required>
+        <div class="form-group">
+            <label>Project Title</label>
+            {{ form.title }}
+        </div>
 
-  <label for="description">Project Description</label>
-  <textarea name="description" placeholder="Project Description"></textarea>
+        <div class="form-group">
+            <label>Description</label>
+            {{ form.description }}
+        </div>
 
-  <label for="budget">Budget (₹)</label>
-  <input name="budget" placeholder="Budget">
+        <div class="form-group">
+            <label>Budget</label>
+            {{ form.budget }}
+        </div>
 
-  <label for="skills_required">Skills Required</label>
-  <input name="skills_required" placeholder="e.g. Java, Python, SQL, DevOps">
+        <div class="form-group">
+            <label>Deadline</label>
+            {{ form.deadline }}
+        </div>
 
-  <label for="duration">Duration (in days)</label>
-  <input name="duration" type="number" placeholder="Duration">
+        <div class="form-group">
+            <label>Duration (days)</label>
+            {{ form.duration }}
+        </div>
 
-  <label for="deadline">Deadline</label>
-  <input name="deadline" type="date">
+        <!-- ✍️ SKILLS INPUT -->
+        <div class="form-group">
+            <label>Skills Required</label>
+            {{ form.skills_text }}
+            <small style="color:#94a3b8;">
+                Example: Python, Django, React
+            </small>
+        </div>
 
-  <button class="btn">Create Project</button>
-</form>
+        <button type="submit">Create Project</button>
+    </form>
+
+    <a href="{% url 'client_dashboard' %}">← Back to Dashboard</a>
 </div>
+
 </body>
 </html>

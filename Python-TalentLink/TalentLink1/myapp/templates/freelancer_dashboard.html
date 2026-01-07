@@ -1,189 +1,170 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Freelancer Dashboard</title>
-
     <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #020617, #0f172a);
-            color: #e5e7eb;
+        body { 
+            background: #0f172a; 
+            font-family: "Segoe UI"; 
+            color: #e5e7eb; 
+            margin:0; 
+            padding:20px;
         }
 
-        .header {
-            background: #020617;
-            padding: 18px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,.4);
+        .header { 
+            display:flex; 
+            justify-content:space-between; 
+            align-items:center; 
+            margin-bottom:20px; 
         }
 
-        .header-title {
-            font-size: 22px;
-            font-weight: 600;
+        h1 { margin:0; }
+
+        .logout-btn { 
+            background:#ef4444; 
+            color:#020617; 
+            padding:8px 16px; 
+            border-radius:10px; 
+            text-decoration:none; 
+            font-weight:bold; 
         }
 
-        .logout-btn {
-            background: #ef4444;
-            color: #020617;
-            padding: 8px 18px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #dc2626;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        /* 🔍 SEARCH BAR */
-        .search-bar {
-            width: 100%;
-            padding: 14px 18px;
+        /* ===== SEARCH BAR ===== */
+        .search-box {
             margin-bottom: 25px;
-            border-radius: 14px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
             border: none;
-            font-size: 15px;
-            background: #020617;
-            color: #e5e7eb;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-            outline: none;
+            font-size: 14px;
         }
 
-        .project-card {
-            background: #1e293b;
-            border-radius: 16px;
-            padding: 22px;
-            margin-bottom: 22px;
-            box-shadow: 0 10px 30px rgba(0,0,0,.35);
-        }
-
-        .label {
-            color: #94a3b8;
-            font-size: 13px;
-            margin-top: 10px;
-        }
-
-        .value, .desc {
-            font-size: 15px;
-            font-weight: 500;
-            margin-top: 3px;
-        }
-
-        .proposal-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            margin-top: 6px;
-            font-weight: 600;
-        }
-
-        .accepted { background: #22c55e; color: #020617; }
-        .pending  { background: #f59e0b; color: #020617; }
-        .rejected { background: #ef4444; color: #020617; }
-
-        .btn {
-            display: inline-block;
+        .search-box button {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
             background: #38bdf8;
             color: #020617;
-            padding: 8px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            margin-top: 10px;
-            margin-right: 10px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
-        .btn:hover {
-            background: #0ea5e9;
+        .project-card { 
+            background:#1e293b; 
+            padding:20px; 
+            border-radius:14px; 
+            margin-bottom:20px; 
+        }
+
+        .label { font-size:13px; color:#94a3b8; margin-top:10px; }
+        .value { font-size:15px; font-weight:500; margin-top:3px; }
+
+        .btn { 
+            display:inline-block; 
+            padding:8px 16px; 
+            margin-top:10px; 
+            margin-right:10px; 
+            border-radius:10px; 
+            font-weight:bold; 
+            text-decoration:none; 
+        }
+
+        .blue { background:#38bdf8; color:#020617; }
+        .green { background:#22c55e; color:#020617; }
+
+        .contracts-table { 
+            width:100%; 
+            border-collapse: collapse; 
+            margin-top:30px; 
+        }
+
+        .contracts-table th, 
+        .contracts-table td { 
+            padding:12px 10px; 
+            border-bottom:1px solid #334155; 
+            text-align:left; 
+        }
+
+        .contracts-table th { color:#94a3b8; }
+
+        .contracts-table td a { 
+            background:#22c55e; 
+            color:#022c22; 
+            padding:6px 12px; 
+            border-radius:8px; 
+            text-decoration:none; 
+            font-size:13px; 
+            font-weight:bold; 
         }
     </style>
 </head>
 
 <body>
 
-    <!-- HEADER -->
     <div class="header">
-        <div class="header-title">Freelancer Dashboard</div>
+        <h1>Freelancer Dashboard</h1>
         <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
     </div>
 
-    <!-- CONTENT -->
-    <div class="container">
-
-        <!-- 🔍 Search Bar -->
-        <input
-            type="text"
-            id="projectSearch"
-            class="search-bar"
-            placeholder="Search project by title..."
-            onkeyup="searchProjects()"
+    <!-- ===== SEARCH BAR ===== -->
+    <form method="get" class="search-box">
+        <input 
+            type="text" 
+            name="q" 
+            placeholder="Search projects by title, description, or client..."
+            value="{{ request.GET.q }}"
         >
+        <button type="submit">Search</button>
+    </form>
 
-        {% for project in projects %}
-        <div class="project-card project-item">
+    {% for project in projects %}
+    <div class="project-card">
+        <div class="label">Project</div>
+        <div class="value">{{ project.title }}</div>
 
-            <div class="label">Project</div>
-            <div class="value project-title">{{ project.title }}</div>
+        <div class="label">Description</div>
+        <div class="value">{{ project.description }}</div>
 
-            <div class="label">Description</div>
-            <div class="desc">{{ project.description }}</div>
+        <div class="label">Client</div>
+        <div class="value">{{ project.client.username }}</div>
 
-            <div class="label">Client</div>
-            <div class="value">{{ project.client.username }}</div>
-
-            <div class="label">Your Proposal</div>
-
-            {% if project.user_proposal %}
-                <div class="value">₹{{ project.user_proposal.bid_amount }}</div>
-                <span class="proposal-status {{ project.user_proposal.status|lower }}">
-                    {{ project.user_proposal.status }}
-                </span>
-
-                <a href="{% url 'project_detail' project.id %}" class="btn">
-                    View Proposal
-                </a>
-            {% else %}
-                <span class="proposal-status pending">Not submitted</span>
-                <a href="{% url 'submit_proposal' project.id %}" class="btn">
-                    Submit Proposal
-                </a>
-            {% endif %}
-
-        </div>
-        {% empty %}
-            <p>No projects available.</p>
-        {% endfor %}
-
+        <a href="{% url 'project_detail' project.id %}" class="btn blue">View Details</a>
+        <a href="{% url 'submit_proposal' project.id %}" class="btn green">Submit Proposal</a>
     </div>
+    {% empty %}
+        <p>No projects found.</p>
+    {% endfor %}
 
-    <!-- 🔎 SEARCH SCRIPT -->
-    <script>
-        function searchProjects() {
-            const input = document.getElementById("projectSearch").value.toLowerCase();
-            const projects = document.getElementsByClassName("project-item");
+    <h3>Your Contracts</h3>
 
-            for (let i = 0; i < projects.length; i++) {
-                const title = projects[i]
-                    .getElementsByClassName("project-title")[0]
-                    .innerText.toLowerCase();
-
-                projects[i].style.display = title.includes(input) ? "" : "none";
-            }
-        }
-    </script>
+    {% if contracts %}
+    <table class="contracts-table">
+        <tr>
+            <th>Project</th>
+            <th>Client</th>
+            <th>Status</th>
+            <th>Chat</th>
+        </tr>
+        {% for contract in contracts %}
+        <tr>
+            <td>{{ contract.project.title }}</td>
+            <td>{{ contract.client.user.username }}</td>
+            <td>{{ contract.status }}</td>
+            <td>
+                <a href="{% url 'contract_chat' contract.id %}">Chat</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No contracts yet.</p>
+    {% endif %}
 
 </body>
 </html>

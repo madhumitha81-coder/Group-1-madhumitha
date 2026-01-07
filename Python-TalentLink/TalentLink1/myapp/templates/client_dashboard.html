@@ -1,8 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Client Dashboard</title>
     <style>
+        /* ---------------- Body ---------------- */
         body {
             background: linear-gradient(135deg, #0f1117, #1e293b);
             font-family: "Segoe UI", sans-serif;
@@ -10,6 +13,7 @@
             color: #e5e7eb;
         }
 
+        /* ---------------- Navbar ---------------- */
         .navbar {
             background: #0f172a;
             padding: 16px 32px;
@@ -34,6 +38,7 @@
 
         .container { max-width: 1000px; margin: 30px auto; }
 
+        /* ---------------- Search Bar ---------------- */
         .search-bar {
             width: 100%;
             padding: 14px 18px;
@@ -47,6 +52,7 @@
             outline: none;
         }
 
+        /* ---------------- Project Card ---------------- */
         .project-card {
             background: #0f172a;
             padding: 22px;
@@ -87,6 +93,7 @@
         .edit { background: #facc15; color: #3b2f0b; }
         .delete { background: #ef4444; color: #020617; }
 
+        /* ---------------- Proposal Card ---------------- */
         .proposal-card {
             background: #1e293b;
             padding: 15px;
@@ -107,9 +114,30 @@
         .accepted { background: #22c55e; color: #022c22; }
         .rejected { background: #ef4444; color: #020617; }
         .pending { background: #facc15; color: #3b2f0b; }
+
+        /* ---------------- Contracts Table ---------------- */
+        .contracts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+        .contracts-table th, .contracts-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #334155;
+            text-align: left;
+        }
+        .contracts-table th { color: #94a3b8; }
+        .contracts-table td a {
+            background: #22c55e;
+            color: #022c22;
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+        }
     </style>
 </head>
-
 <body>
 
 <div class="navbar">
@@ -131,6 +159,7 @@
         onkeyup="searchProjects()"
     >
 
+    <!-- ---------------- Projects ---------------- -->
     {% for project in projects %}
     <div class="project-card project-item">
 
@@ -161,31 +190,61 @@
         <div class="actions">
             <a href="{% url 'project_detail' project.id %}" class="view">View</a>
             <a href="{% url 'update_project' project.id %}" class="edit">Update</a>
-            <form method="post" action="{% url 'delete_project' project.id %}" style="display:inline;">
+            <form action="{% url 'delete_project' project.pk %}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this project?');">
                 {% csrf_token %}
                 <button type="submit" class="delete">Delete</button>
             </form>
         </div>
 
+        <!-- ---------------- Proposals ---------------- -->
         <h4>Proposals:</h4>
         {% for proposal in project.proposals.all %}
         <div class="proposal-card">
             <p><strong>Freelancer:</strong> {{ proposal.freelancer.user.username }}</p>
-            <p><strong>Cover Letter:</strong> {{ proposal.cover_letter }}</p>
             <p><strong>Bid:</strong> ₹{{ proposal.bid_amount }}</p>
 
             <span class="proposal-status {{ proposal.status|lower }}">
                 {{ proposal.status }}
             </span>
-        </div>
-        {% empty %}
-            <p>No proposals yet.</p>
-        {% endfor %}
 
+            {% if request.user == project.client and proposal.status == "pending" %}
+            <form method="post" action="{% url 'update_proposal_status' proposal.id %}">
+                {% csrf_token %}
+                <button type="submit" name="status" value="accepted">Accept</button>
+                <button type="submit" name="status" value="rejected">Reject</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
     {% empty %}
         <p>No projects posted yet.</p>
     {% endfor %}
+
+    <!-- ---------------- Contracts ---------------- -->
+    <h3>Your Contracts</h3>
+    {% if contracts %}
+    <table class="contracts-table">
+        <tr>
+            <th>Project</th>
+            <th>Freelancer</th>
+            <th>Status</th>
+            <th>Chat</th>
+        </tr>
+        {% for contract in contracts %}
+        <tr>
+            <td>{{ contract.project.title }}</td>
+            <td>{{ contract.freelancer.user.username }}</td>
+            <td>{{ contract.status }}</td>
+            <td>
+                <a href="{% url 'contract_chat' contract.id %}">Chat</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No contracts yet.</p>
+    {% endif %}
 
 </div>
 

@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Contract Chat - {{ contract.project.title }}</title>
+
+<style>
+body { font-family: "Segoe UI"; background: #1e293b; color: #e5e7eb; margin:0; display:flex; flex-direction:column; height:100vh; }
+header { background:#0f172a; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #374151; }
+header h2 { margin:0; font-size:20px; }
+.header-btn { background:#2563eb; padding:8px 14px; border-radius:8px; text-decoration:none; font-weight:bold; color:white; margin-left:10px; }
+.header-btn.red { background:#ef4444; }
+.header-btn:hover { opacity:0.9; }
+
+.chat-container { flex:1; display:flex; flex-direction:column; justify-content:flex-end; padding:16px; overflow-y:auto; gap:10px; }
+.message { max-width:70%; padding:10px 14px; border-radius:12px; word-wrap:break-word; line-height:1.4; }
+.sent { background-color:#2563eb; align-self:flex-end; color:white; border-bottom-right-radius:2px; }
+.received { background-color:#374151; align-self:flex-start; border-bottom-left-radius:2px; }
+
+form { display:flex; padding:16px; background:#0f172a; border-top:1px solid #374151; gap:10px; }
+input[type="text"] { flex:1; padding:10px; border-radius:8px; border:none; font-size:14px; }
+input[type="file"] { color:white; font-size:12px; }
+button { padding:10px 16px; background-color:#2563eb; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold; }
+button:hover { background-color:#1e40af; }
+
+.file-box { margin-top:8px; display:inline-block; }
+.file-box img { max-width:180px; border-radius:10px; margin-top:6px; }
+</style>
+</head>
+<body>
+
+<header>
+<h2>Contract Chat - {{ contract.project.title }}</h2>
+<div>
+    <a href="{% url 'root' %}" class="header-btn">Dashboard</a>
+    <a href="{% url 'clear_contract_chat' contract.id %}" class="header-btn red">Clear Chat</a>
+</div>
+</header>
+
+<div class="chat-container" id="chat-box">
+    {% for msg in messages %}
+    <div class="message {% if msg.sender == request.user.username %}sent{% else %}received{% endif %}">
+        <b>{{ msg.sender }} ({{ msg.sender_role|title }})</b>
+        <small>{{ msg.timestamp|date:"H:i d M Y" }}</small>
+        <p>{{ msg.content }}</p>
+
+        {% if msg.file %}
+        <div class="file-box">
+            {% if msg.is_image %}
+                <img src="{{ msg.file.url }}" alt="Image">
+            {% else %}
+                <a href="{{ msg.file.url }}" download style="color:#93c5fd; font-size:13px;">
+                    📎 Download {{ msg.file.name }}
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>No messages yet. Start the conversation!</p>
+    {% endfor %}
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="text" name="content" placeholder="Type your message..." autocomplete="off">
+    <input type="file" name="file">
+    <button type="submit">Send</button>
+</form>
+
+<script>
+const chatBox = document.getElementById('chat-box');
+chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+
+</body>
+</html>

@@ -61,16 +61,7 @@ TEMPLATES = [
     },
 ]
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'demo',
-        'USER': 'postgres',
-        'PASSWORD': 'madhumitha@81',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
@@ -87,10 +78,32 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CORS_ALLOW_ALL_ORIGINS = True
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  # Must be exactly this
+        'NAME': 'demo',                              # Your database name
+        'USER': 'postgres',                          # Your PostgreSQL username
+        'PASSWORD': 'madhumitha@81',                # Your PostgreSQL password
+        'HOST': 'localhost',                         # Usually localhost
+        'PORT': '5432',                              # Default PostgreSQL port
+    }
+}

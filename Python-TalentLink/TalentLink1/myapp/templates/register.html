@@ -3,96 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register</title>
+<title>Create Account</title>
+
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f0f4f8;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-    .container {
-        background: #fff;
-        padding: 40px 50px;
-        border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        width: 400px;
-        text-align: center;
-    }
-    h2 {
-        margin-bottom: 30px;
-        color: #333;
-    }
-    input[type="text"], input[type="email"], input[type="password"] {
-        width: 100%;
-        padding: 12px;
-        margin: 10px 0;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        outline: none;
-    }
-    label {
-        font-weight: bold;
-        display: block;
-        margin-top: 15px;
-        margin-bottom: 5px;
-        text-align: left;
-    }
-    .role {
-        text-align: left;
-        margin: 5px 0 15px 0;
-    }
-    button {
-        width: 100%;
-        padding: 12px;
-        background: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-    }
-    button:hover {
-        background: #45a049;
-    }
-    .error {
-        color: red;
-        margin-top: 10px;
-    }
-    a {
-        display: block;
-        margin-top: 15px;
-        text-decoration: none;
-        color: #4CAF50;
-    }
+/* ---------- Base ---------- */
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* ---------- Card ---------- */
+.auth-card {
+    background: #ffffff;
+    width: 420px;
+    padding: 36px 40px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+}
+
+/* ---------- Heading ---------- */
+.auth-card h2 {
+    margin: 0 0 6px 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+.auth-card p {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* ---------- Messages ---------- */
+.success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+/* ---------- Form ---------- */
+.form-group {
+    margin-bottom: 14px;
+}
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+input:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+/* ---------- Role ---------- */
+.role-group {
+    display: flex;
+    gap: 20px;
+    margin: 12px 0 18px 0;
+}
+.role-group label {
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/* ---------- Button ---------- */
+button {
+    width: 100%;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 11px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+}
+button:hover {
+    background: #1e40af;
+}
+
+/* ---------- Footer ---------- */
+.auth-footer {
+    margin-top: 18px;
+    font-size: 14px;
+    text-align: center;
+}
+.auth-footer a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+.auth-footer a:hover {
+    text-decoration: underline;
+}
 </style>
 </head>
+
 <body>
-<div class="container">
-    <h2>Register</h2>
+
+<div class="auth-card">
+    <h2>Create account</h2>
+    <p>Sign up to continue</p>
+
+    <!-- Django messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
 
-        <label>Select Role:</label>
-        <div class="role">
-            <input type="radio" name="role" value="client" required> Client<br>
-            <input type="radio" name="role" value="freelancer" required> Freelancer<br> 
-
-
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" required>
         </div>
 
-        <button type="submit">Register</button>
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+        </div>
+
+        <label>Account type</label>
+        <div class="role-group">
+            <label>
+                <input type="radio" name="role" value="client" required> Client
+            </label>
+            <label>
+                <input type="radio" name="role" value="freelancer" required> Freelancer
+            </label>
+        </div>
+
+        <button type="submit">Create account</button>
     </form>
-    <a href="/login/">Already have an account? Login</a>
+
+    <div class="auth-footer">
+        Already have an account?
+        <a href="{% url 'login' %}">Sign in</a>
+    </div>
 </div>
+
 </body>
 </html>

@@ -67,10 +67,11 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-LOGIN_REDIRECT_URL = '/'      # After login, redirect to home
-LOGOUT_REDIRECT_URL = '/login/'
-LOGIN_URL = '/login/'
-  # After logout
+LOGIN_REDIRECT_URL = "/"
+
+LOGIN_URL = "/login/"
+
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),

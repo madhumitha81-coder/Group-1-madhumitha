@@ -2,7 +2,8 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
-from .models import Project, Skill
+from .models import Project, Skill, Review
+
 
 # -------------------------
 # LOGIN FORM
@@ -38,53 +39,31 @@ class UserRegisterForm(forms.Form):
 
 
 # -------------------------
-# PROJECT FORM
+# PROJECT FORM  ✅ FIXED
 # -------------------------
+from django import forms
+from .models import Project
+
 class ProjectForm(forms.ModelForm):
-    skills_text = forms.CharField(
-        required=False,
-        label="Skills Required",
-        widget=forms.TextInput(attrs={
-            "placeholder": "Python, Django, React"
-        })
-    )
+    skills_text = forms.CharField(required=False)
 
     class Meta:
         model = Project
-        fields = [
-            "title",
-            "description",
-            "budget",
-            "deadline",
-            "duration",
-        ]
+        exclude = ["client"]
         widgets = {
-            "deadline": forms.DateInput(attrs={"type": "date"}),
+            "deadline": forms.DateInput(attrs={"type": "date"})
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
-        # Show existing skills when editing
-        if self.instance.pk:
-            self.fields["skills_text"].initial = ", ".join(
-                skill.name for skill in self.instance.skills_required.all()
-            )
 
-    def save(self, commit=True):
-        project = super().save(commit=False)
-
-        if commit:
-            project.save()   # ✅ MUST SAVE FIRST (get ID)
-
-            # Handle skills safely AFTER save
-            skills_text = self.cleaned_data.get("skills_text", "")
-            skills = [s.strip() for s in skills_text.split(",") if s.strip()]
-
-            project.skills_required.clear()
-
-            for skill_name in skills:
-                skill, _ = Skill.objects.get_or_create(name=skill_name)
-                project.skills_required.add(skill)
-
-        return project
+# -------------------------
+# REVIEW FORM
+# -------------------------
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']
+        widgets = {
+            'rating': forms.NumberInput(attrs={'min': 1, 'max': 5}),
+            'comment': forms.Textarea(attrs={'rows': 3}),
+        }

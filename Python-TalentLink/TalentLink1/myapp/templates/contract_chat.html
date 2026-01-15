@@ -3,75 +3,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Contract Chat - {{ contract.project.title }}</title>
+<title>Contract Chat</title>
 
 <style>
-body { font-family: "Segoe UI"; background: #1e293b; color: #e5e7eb; margin:0; display:flex; flex-direction:column; height:100vh; }
-header { background:#0f172a; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #374151; }
-header h2 { margin:0; font-size:20px; }
-.header-btn { background:#2563eb; padding:8px 14px; border-radius:8px; text-decoration:none; font-weight:bold; color:white; margin-left:10px; }
-.header-btn.red { background:#ef4444; }
-.header-btn:hover { opacity:0.9; }
-
-.chat-container { flex:1; display:flex; flex-direction:column; justify-content:flex-end; padding:16px; overflow-y:auto; gap:10px; }
-.message { max-width:70%; padding:10px 14px; border-radius:12px; word-wrap:break-word; line-height:1.4; }
-.sent { background-color:#2563eb; align-self:flex-end; color:white; border-bottom-right-radius:2px; }
-.received { background-color:#374151; align-self:flex-start; border-bottom-left-radius:2px; }
-
-form { display:flex; padding:16px; background:#0f172a; border-top:1px solid #374151; gap:10px; }
-input[type="text"] { flex:1; padding:10px; border-radius:8px; border:none; font-size:14px; }
-input[type="file"] { color:white; font-size:12px; }
-button { padding:10px 16px; background-color:#2563eb; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold; }
-button:hover { background-color:#1e40af; }
-
-.file-box { margin-top:8px; display:inline-block; }
-.file-box img { max-width:180px; border-radius:10px; margin-top:6px; }
+body { font-family: Arial; background:#f0f2f5; }
+.chat-container { width:800px; margin:40px auto; background:#fff; padding:20px; border-radius:8px; }
+.messages { height:400px; overflow-y:auto; border:1px solid #ddd; padding:10px; }
+.message { margin-bottom:10px; }
+.sender { font-weight:bold; }
+.clear { background:#dc3545; }
 </style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
+
 <body>
 
-<header>
-<h2>Contract Chat - {{ contract.project.title }}</h2>
-<div>
-    <a href="{% url 'root' %}" class="header-btn">Dashboard</a>
-    <a href="{% url 'clear_contract_chat' contract.id %}" class="header-btn red">Clear Chat</a>
-</div>
-</header>
+<div class="chat-container">
+    <h2>Chat – Contract #{{ contract.id }}</h2>
 
-<div class="chat-container" id="chat-box">
-    {% for msg in messages %}
-    <div class="message {% if msg.sender == request.user.username %}sent{% else %}received{% endif %}">
-        <b>{{ msg.sender }} ({{ msg.sender_role|title }})</b>
-        <small>{{ msg.timestamp|date:"H:i d M Y" }}</small>
-        <p>{{ msg.content }}</p>
+    <div class="messages" id="messages">
+        {% for msg in messages %}
+            <div class="message">
+                <span class="sender">{{ msg.sender.user.username }}:</span>
+                {{ msg.content }}
 
-        {% if msg.file %}
-        <div class="file-box">
-            {% if msg.is_image %}
-                <img src="{{ msg.file.url }}" alt="Image">
-            {% else %}
-                <a href="{{ msg.file.url }}" download style="color:#93c5fd; font-size:13px;">
-                    📎 Download {{ msg.file.name }}
-                </a>
-            {% endif %}
-        </div>
-        {% endif %}
+                {% if msg.file %}
+                    <br>
+                    <a href="{{ msg.file.url }}" download>Download file</a>
+                {% endif %}
+
+                <span style="float:right;font-size:10px;color:#999;">
+                    {{ msg.timestamp|date:"H:i" }}
+                </span>
+            </div>
+        {% empty %}
+            <p>No messages yet.</p>
+        {% endfor %}
     </div>
-    {% empty %}
-    <p>No messages yet. Start the conversation!</p>
-    {% endfor %}
-</div>
 
-<form method="post" enctype="multipart/form-data">
+    <br>
+
     {% csrf_token %}
-    <input type="text" name="content" placeholder="Type your message..." autocomplete="off">
-    <input type="file" name="file">
-    <button type="submit">Send</button>
-</form>
+    <input type="text" id="messageText" placeholder="Type message">
+    <input type="file" id="fileInput">
+    <button id="sendBtn">Send</button>
+    <button id="clearBtn" class="clear">Clear Chat</button>
+</div>
 
 <script>
-const chatBox = document.getElementById('chat-box');
-chatBox.scrollTop = chatBox.scrollHeight;
+function scrollBottom() {
+    let box = document.getElementById("messages");
+    box.scrollTop = box.scrollHeight;
+}
+scrollBottom();
+
+$("#sendBtn").click(function () {
+    let text = $("#messageText").val();
+    let file = $("#fileInput")[0].files[0];
+
+    if (!text && !file) return;
+
+    let formData = new FormData();
+    formData.append("contract_id", "{{ contract.id }}");
+    formData.append("content", text);
+    if (file) formData.append("file", file);
+    formData.append(
+        "csrfmiddlewaretoken",
+        document.querySelector("[name=csrfmiddlewaretoken]").value
+    );
+
+    $.ajax({
+        url: "{% url 'send_message' %}",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function () {
+            location.reload(); // SIMPLE & SAFE
+        }
+    });
+});
+
+$("#clearBtn").click(function () {
+    if (!confirm("Clear chat?")) return;
+
+    $.post("{% url 'clear_chat' contract.id %}", {
+        csrfmiddlewaretoken:
+            document.querySelector("[name=csrfmiddlewaretoken]").value
+    }, function () {
+        location.reload();
+    });
+});
 </script>
 
 </body>

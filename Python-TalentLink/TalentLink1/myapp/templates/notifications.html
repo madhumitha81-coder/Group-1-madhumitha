@@ -1,0 +1,16 @@
+<div class="notification-box">
+    🔔
+    {% if notifications.count %}
+        <span class="badge">{{ notifications.count }}</span>
+    {% endif %}
+
+    <div class="dropdown">
+        {% for n in notifications %}
+            <div class="notification-item">
+                {{ n.message }}
+            </div>
+        {% empty %}
+            <div class="notification-item">No notifications</div>
+        {% endfor %}
+    </div>
+</div>

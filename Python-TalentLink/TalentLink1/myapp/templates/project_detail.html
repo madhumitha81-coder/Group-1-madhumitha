@@ -1,106 +1,64 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Project Detail - {{ project.title }}</title>
-    <style>
-        body {
-            background: linear-gradient(135deg,#0f1117,#1e293b);
-            font-family: "Segoe UI", sans-serif;
-            color: #e5e7eb;
-            padding: 30px;
-        }
-
-        h2, h3 { margin-bottom: 15px; }
-
-        /* ===== DASHBOARD BUTTON ===== */
-        .top-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-        }
-
-        .dashboard-btn {
-            background: #38bdf8;
-            color: #020617;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .dashboard-btn:hover {
-            opacity: 0.9;
-        }
-
-        .project-card, .proposal-card, .status-box {
-            background: #0f172a;
-            padding: 20px;
-            border-radius: 14px;
-            margin-bottom: 20px;
-        }
-
-        .label { color: #94a3b8; font-size: 13px; margin-bottom: 6px; }
-
-        .skills span {
-            display: inline-block;
-            background: #1e40af;
-            color: #dbeafe;
-            padding: 5px 10px;
-            border-radius: 14px;
-            font-size: 12px;
-            margin: 3px 4px 3px 0;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            margin-right: 10px;
-            text-decoration: none;
-        }
-
-        .green { background: #22c55e; color: #022c22; }
-        .red { background: #ef4444; color: #020617; }
-        .yellow { background: #facc15; color: #3b2f0b; }
-        .blue { background: #38bdf8; color: #020617; }
-
-        .proposal-card {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 12px;
-        }
-
-        .proposal-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 6px;
-        }
-
-        .pending { background: #facc15; color: #3b2f0b; }
-        .accepted { background: #22c55e; color: #022c22; }
-        .rejected { background: #ef4444; color: #020617; }
-
-        .status-box p { margin: 6px 0; }
-    </style>
+<meta charset="UTF-8">
+<title>Project Detail - {{ project.title }}</title>
+<style>
+body {
+    background: linear-gradient(135deg,#0f1117,#1e293b);
+    font-family: "Segoe UI", sans-serif;
+    color: #e5e7eb;
+    padding: 30px;
+}
+h2,h3 { margin-bottom: 15px; }
+.top-bar { display:flex; justify-content:flex-end; margin-bottom:20px; }
+.dashboard-btn {
+    background:#38bdf8; color:#020617;
+    padding:8px 16px; border-radius:10px;
+    font-weight:bold; text-decoration:none;
+}
+.project-card, .status-box {
+    background:#0f172a; padding:20px;
+    border-radius:14px; margin-bottom:20px;
+}
+.label { color:#94a3b8; font-size:13px; margin-bottom:6px; }
+.skills span {
+    display:inline-block;
+    background:#1e40af;
+    color:#dbeafe;
+    padding:5px 10px;
+    border-radius:14px;
+    font-size:12px;
+    margin:3px 4px 3px 0;
+}
+.btn { padding:8px 16px; border-radius:10px; font-weight:bold; border:none; cursor:pointer; margin-right:10px; text-decoration:none; }
+.green { background:#22c55e; color:#000; }
+.red { background:#ef4444; color:#fff; }
+.yellow { background:#facc15; color:#000; }
+.proposal-status { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:bold; }
+.pending { background:#facc15; color:#000; }
+.accepted { background:#22c55e; color:#000; }
+.rejected { background:#ef4444; color:#000; }
+table { width:100%; border-collapse: collapse; margin-top:20px; }
+th, td { padding:12px; text-align:left; border-bottom:1px solid #1e293b; }
+th { color:#94a3b8; }
+form { display:inline; }
+button { cursor:pointer; }
+</style>
 </head>
 <body>
 
-<!-- ===== DASHBOARD NAV ===== -->
+<!-- ===== DASHBOARD BUTTON ===== -->
 <div class="top-bar">
     {% if is_client %}
-        <a href="{% url 'client_dashboard' %}" class="dashboard-btn">Go to Dashboard</a>
+        <a href="{% url 'client_dashboard' %}" class="dashboard-btn">Client Dashboard</a>
     {% else %}
-        <a href="{% url 'freelancer_dashboard' %}" class="dashboard-btn">Go to Dashboard</a>
+        <a href="{% url 'freelancer_dashboard' %}" class="dashboard-btn">Freelancer Dashboard</a>
     {% endif %}
 </div>
 
-<!-- ================= PROJECT INFO ================= -->
+<!-- ===== PROJECT INFO ===== -->
 <div class="project-card">
     <h2>{{ project.title }}</h2>
     <p>{{ project.description }}</p>
@@ -118,53 +76,82 @@
     </div>
 </div>
 
-<hr>
+<!-- ===== PROPOSALS TABLE ===== -->
+<h3>Proposals</h3>
 
-<!-- ================= CLIENT VIEW ================= -->
-{% if is_client %}
-<h3>Freelancer Proposals</h3>
-{% for p in proposals %}
-<div class="proposal-card">
-    <p><b>Freelancer:</b> {{ p.freelancer.user.username }}</p>
-    <p><b>Cover Letter:</b> {{ p.cover_letter }}</p>
-    <p><b>Bid:</b> ₹{{ p.bid_amount }}</p>
+<div style="display:flex; flex-wrap:wrap; gap:15px;">
 
-    <span class="proposal-status {{ p.status|lower }}">{{ p.status }}</span>
+    {% for proposal in proposals %}
+    <div style="
+        background:#1f2937;
+        border:1px solid #27272a;
+        border-radius:12px;
+        padding:15px;
+        width:250px;
+        box-shadow:0 2px 6px rgba(0,0,0,0.5);
+        transition: transform 0.2s, box-shadow 0.2s;
+    "
+    onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.6)';"
+    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.5)';"
+    >
+        <p><strong>Freelancer:</strong> {{ proposal.freelancer.username }}</p>
+        <p><strong>Bid:</strong> ₹{{ proposal.bid_amount|floatformat:2 }}</p>
+        <p><strong>Status:</strong>
+            <span class="proposal-status {{ proposal.status|lower }}">
+                {{ proposal.get_status_display }}
+            </span>
+        </p>
 
-    {% if p.status == "PENDING" %}
-    <div style="margin-top:12px;">
-        <form method="post" action="{% url 'update_proposal_status' p.id %}">
-            {% csrf_token %}
-            <button name="status" value="ACCEPTED" class="btn green">Accept</button>
-            <button name="status" value="REJECTED" class="btn red">Reject</button>
-            <button name="status" value="PENDING" class="btn yellow">Pending</button>
-        </form>
+        {% if proposal.status|lower == 'pending' and is_client %}
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+            <form method="POST" action="{% url 'accept_proposal' proposal.id %}">
+                {% csrf_token %}
+                <button class="btn green" type="submit">Accept</button>
+            </form>
+            <form method="POST" action="{% url 'reject_proposal' proposal.id %}">
+                {% csrf_token %}
+                <button class="btn red" type="submit">Reject</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if proposal.contract %}
+        <a href="{% url 'contract_chat' proposal.contract.id %}" class="btn green" style="margin-top:10px; display:inline-block;">
+            Go to Contract Chat
+        </a>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
-{% empty %}
-<p>No proposals yet.</p>
-{% endfor %}
-{% endif %}
+    {% empty %}
+        <p style="color:#94a3b8; margin-top:10px;">No proposals yet.</p>
+    {% endfor %}
 
-<!-- ================= FREELANCER VIEW ================= -->
+</div>
+
+<!-- ===== FREELANCER VIEW ===== -->
 {% if not is_client and user_proposal %}
-<div class="status-box">
-    <h3>Your Proposal Status</h3>
-    <p><b>Client:</b> {{ project.client.username }}</p>
+<div style="
+    background:#1f2937;
+    border:1px solid #27272a;
+    border-radius:12px;
+    padding:15px;
+    width:300px;
+    margin-top:20px;
+">
+    <h3>Your Proposal</h3>
     <p><b>Status:</b>
         <span class="proposal-status {{ user_proposal.status|lower }}">
-            {{ user_proposal.status }}
+            {{ user_proposal.status|capfirst }}
         </span>
     </p>
 
-    {% if user_proposal.status == "ACCEPTED" and user_proposal.contract %}
+    {% if user_proposal.status|lower == "accepted" and user_proposal.contract %}
         <a href="{% url 'contract_chat' user_proposal.contract.id %}" class="btn green">
             Go to Contract Chat
         </a>
     {% endif %}
 </div>
 {% endif %}
+
 
 </body>
 </html>

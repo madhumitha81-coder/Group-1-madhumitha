@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,141 +31,243 @@
             font-weight:bold; 
         }
 
-        /* ===== SEARCH BAR ===== */
-        .search-box {
-            margin-bottom: 25px;
-            display: flex;
-            gap: 10px;
+        .notif-btn{
+            background:#22c55e;
+            color:#020617;
+            padding:8px 14px;
+            border-radius:10px;
+            font-weight:bold;
+            text-decoration:none;
+            margin-right:10px;
+            display:flex;
+            align-items:center;
+            gap:6px;
         }
 
-        .search-box input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 10px;
-            border: none;
-            font-size: 14px;
+        .badge{
+            background:#020617;
+            color:#22c55e;
+            padding:2px 8px;
+            border-radius:50%;
+            font-size:12px;
+            font-weight:700;
         }
 
-        .search-box button {
-            padding: 10px 18px;
-            border-radius: 10px;
-            border: none;
-            background: #38bdf8;
-            color: #020617;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .search-box { margin-bottom: 25px; display:flex; gap:10px; }
+        .search-box input { flex:1; padding:10px; border-radius:10px; border:none; font-size:14px; }
+        .search-box button { padding:10px 18px; border-radius:10px; border:none; background:#38bdf8; color:#020617; font-weight:bold; cursor:pointer; }
 
-        .project-card { 
-            background:#1e293b; 
-            padding:20px; 
-            border-radius:14px; 
-            margin-bottom:20px; 
-        }
-
+        .project-card { background:#1e293b; padding:20px; border-radius:14px; margin-bottom:20px; }
         .label { font-size:13px; color:#94a3b8; margin-top:10px; }
         .value { font-size:15px; font-weight:500; margin-top:3px; }
-
-        .btn { 
-            display:inline-block; 
-            padding:8px 16px; 
-            margin-top:10px; 
-            margin-right:10px; 
-            border-radius:10px; 
-            font-weight:bold; 
-            text-decoration:none; 
-        }
-
+        .btn { display:inline-block; padding:8px 16px; margin-top:10px; margin-right:10px; border-radius:10px; font-weight:bold; text-decoration:none; }
         .blue { background:#38bdf8; color:#020617; }
         .green { background:#22c55e; color:#020617; }
 
-        .contracts-table { 
-            width:100%; 
-            border-collapse: collapse; 
-            margin-top:30px; 
-        }
+        .contracts-section { margin-top:40px; }
+        .contract-card { background:#1e293b; padding:16px; border-radius:12px; margin-bottom:16px; }
+        .review-box input, .review-box textarea { width:100%; padding:8px; border-radius:8px; border:1px solid #334155; margin-bottom:6px; background:#0f172a; color:#fff; }
+        .review-box button { background:#22c55e; color:#022c22; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; }
 
-        .contracts-table th, 
-        .contracts-table td { 
-            padding:12px 10px; 
-            border-bottom:1px solid #334155; 
-            text-align:left; 
-        }
+        .notification-card{ background:#1e293b; padding:16px; border-radius:12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+        .unread{ font-weight:700; }
 
-        .contracts-table th { color:#94a3b8; }
-
-        .contracts-table td a { 
-            background:#22c55e; 
-            color:#022c22; 
-            padding:6px 12px; 
-            border-radius:8px; 
-            text-decoration:none; 
-            font-size:13px; 
-            font-weight:bold; 
-        }
     </style>
 </head>
 
 <body>
 
-    <div class="header">
-        <h1>Freelancer Dashboard</h1>
+<div class="header">
+    <h1>Freelancer Dashboard</h1>
+    <div style="display:flex;align-items:center;">
+        <a href="#notifications" class="notif-btn">
+            Notifications
+            {% if unread_count > 0 %}
+                <span class="badge" id="notifBadge">{{ unread_count }}</span>
+            {% endif %}
+        </a>
         <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
     </div>
+</div>
 
-    <!-- ===== SEARCH BAR ===== -->
-    <form method="get" class="search-box">
-        <input 
-            type="text" 
-            name="q" 
-            placeholder="Search projects by title, description, or client..."
-            value="{{ request.GET.q }}"
-        >
-        <button type="submit">Search</button>
-    </form>
+<!-- SEARCH -->
+<form method="get" class="search-box">
+    <input type="text" name="q" placeholder="Search projects..." value="{{ request.GET.q }}">
+    <button type="submit">Search</button>
+</form>
 
-    {% for project in projects %}
-    <div class="project-card">
-        <div class="label">Project</div>
-        <div class="value">{{ project.title }}</div>
+<!-- PROJECTS -->
+<h2>Projects</h2>
+{% for project in projects %}
+<div class="project-card">
+    <div class="label">Project</div>
+    <div class="value">{{ project.title }}</div>
 
-        <div class="label">Description</div>
-        <div class="value">{{ project.description }}</div>
+    <div class="label">Description</div>
+    <div class="value">{{ project.description }}</div>
 
-        <div class="label">Client</div>
-        <div class="value">{{ project.client.username }}</div>
+    <div class="label">Client</div>
+    <div class="value">{{ project.client.username }}</div>
 
-        <a href="{% url 'project_detail' project.id %}" class="btn blue">View Details</a>
-        <a href="{% url 'submit_proposal' project.id %}" class="btn green">Submit Proposal</a>
+    <a href="{% url 'project_detail' project.id %}" class="btn blue">View Details</a>
+    <a href="{% url 'submit_proposal' project.id %}" class="btn green">Submit Proposal</a>
+</div>
+{% empty %}
+<p>No projects found.</p>
+{% endfor %}
+
+
+<!-- CONTRACTS -->
+<h2 class="contracts-section">Your Contracts</h2>
+{% if contracts %}
+{% for contract in contracts %}
+<div class="contract-card">
+    <div><strong>Project:</strong> {{ contract.project.title }}</div>
+    <div><strong>Client:</strong> {{ contract.client.user.username }}</div>
+    <div><strong>Status:</strong> {{ contract.status|capfirst }}</div>
+
+    <div style="margin-top:8px;">
+        <a href="{% url 'contract_chat' contract.id %}" class="btn blue">Chat</a>
     </div>
-    {% empty %}
-        <p>No projects found.</p>
-    {% endfor %}
+</div>
+{% endfor %}
+{% else %}
+<p>No contracts yet.</p>
+{% endif %}
 
-    <h3>Your Contracts</h3>
+<!-- NOTIFICATIONS -->
+<!-- CSRF token -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
-    {% if contracts %}
-    <table class="contracts-table">
-        <tr>
-            <th>Project</th>
-            <th>Client</th>
-            <th>Status</th>
-            <th>Chat</th>
-        </tr>
-        {% for contract in contracts %}
-        <tr>
-            <td>{{ contract.project.title }}</td>
-            <td>{{ contract.client.user.username }}</td>
-            <td>{{ contract.status }}</td>
-            <td>
-                <a href="{% url 'contract_chat' contract.id %}">Chat</a>
-            </td>
-        </tr>
+<div id="notificationsSection">
+    <h3>Notifications</h3>
+
+    {% if notifications %}
+        <button onclick="deleteAllNotifications()" class="btn red">Delete All</button><br><br>
+
+        {% for notif in notifications %}
+            <div class="notification-card {% if not notif.is_read %}unread{% endif %}" id="notifCard{{ notif.id }}">
+                <div>
+                    {{ notif.message }}<br>
+                    <small style="color:#94a3b8;">{{ notif.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+
+                {% if not notif.is_read %}
+                    <button onclick="markRead({{ notif.id }})" class="btn green">Mark Read</button>
+                {% endif %}
+            </div>
         {% endfor %}
-    </table>
     {% else %}
-        <p>No contracts yet.</p>
+        <p>No notifications yet.</p>
     {% endif %}
+</div>
+
+
+<h2>Project Reviews</h2>
+
+{% for contract in contracts %}
+    {% with review=reviews_by_contract|get_item:contract.id %}
+        {% if review %}
+        <div style="background:#1e293b; padding:15px; border-radius:8px; margin-bottom:10px;">
+            <strong>Project:</strong> {{ contract.project.title }} <br>
+            <strong>Client/Reviewer:</strong> {{ review.reviewer.username }} <br>
+            <strong>Rating:</strong> {{ review.rating }} ⭐ <br>
+            <strong>Comment:</strong> {{ review.comment }} <br>
+            <small>Reviewed on: {{ review.created_at|date:"d M Y" }}</small>
+        </div>
+        {% endif %}
+    {% endwith %}
+{% empty %}
+    <p>No reviews yet.</p>
+{% endfor %}
+
+<script>
+function toggleReviewForm(contractId){
+    const container = document.getElementById('reviewFormContainer-' + contractId);
+    if(container.style.display === 'none'){
+        container.style.display = 'block';
+        container.innerHTML = `
+            <form onsubmit="submitReview(event, ${contractId})">
+                <input type="number" name="rating" min="1" max="5" placeholder="Rating 1-5" required>
+                <textarea name="comment" placeholder="Comment" required></textarea>
+                <button type="submit">Submit Review</button>
+            </form>
+        `;
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+function submitReview(e, contractId){
+    e.preventDefault();
+    const form = e.target;
+    const rating = form.rating.value;
+    const comment = form.comment.value;
+
+    fetch(`/review/${contractId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type':'application/json',
+            'X-CSRFToken':'{{ csrf_token }}'
+        },
+        body: JSON.stringify({rating, comment})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            const container = document.getElementById('reviewFormContainer-' + contractId);
+            container.innerHTML = `
+                <div><strong>Rating:</strong> ${data.review.rating}</div>
+                <div><strong>Comment:</strong> ${data.review.comment}</div>
+                <em>Reviewed ✅</em>
+            `;
+        } else {
+            alert('Error submitting review');
+        }
+    });
+}
+function markRead(notifId) {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch(`/notification/read/${notifId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success === true) {
+            const card = document.getElementById("notifCard" + notifId);
+            if (card) card.remove();
+        } else {
+            alert("Failed to mark as read: " + (data.error || "Unknown"));
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function deleteAllNotifications() {
+    if(!confirm("Delete all notifications?")) return;
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch(`/notifications/clear_all/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success === true) {
+            // Remove all cards from DOM
+            document.querySelectorAll(".notification-card").forEach(el => el.remove());
+        } else {
+            alert("Failed to delete all notifications");
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+</script>
+
 
 </body>
 </html>

@@ -7,24 +7,17 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # root URL redirects to dashboard/login based on role
-    path('', root_redirect, name='root_redirect'),
+    # Landing page and app-level routing
+    path('', include('myapp.urls')),   # <-- main home page and dashboards
 
-    # authentication
+    # Authentication (can also be included in myapp.urls if you prefer)
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
 
-    # include your myapp URLs if you have app-level routing
-    path('', include('myapp.urls')),  
+    # Role-based redirect after login
+    path('redirect/', root_redirect, name='root_redirect'),
 ]
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
-
-
-
-
-
-

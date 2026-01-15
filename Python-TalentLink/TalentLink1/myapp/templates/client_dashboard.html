@@ -1,267 +1,515 @@
 {% load static %}
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Client Dashboard</title>
-    <style>
-        /* ---------------- Body ---------------- */
-        body {
-            background: linear-gradient(135deg, #0f1117, #1e293b);
-            font-family: "Segoe UI", sans-serif;
-            margin: 0;
-            color: #e5e7eb;
-        }
+<meta charset="UTF-8">
+<title>Client Dashboard</title>
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #0f1117, #1e293b);
+    color: #e5e7eb;
+}
+.layout { display: flex; }
 
-        /* ---------------- Navbar ---------------- */
-        .navbar {
-            background: #0f172a;
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
+/* SIDEBAR */
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: #020617;
+    padding: 30px 20px;
+}
+.sidebar h2 { color: #22c55e; margin-bottom: 30px; }
+.sidebar a {
+    display: block;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: #e5e7eb;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sidebar a:hover { background: #1e293b; }
+.create-btn { background: #22c55e; color: #022c22 !important; }
+.logout-btn { background: #ff2d55; color: #020617 !important; margin-top: 30px; }
 
-        .logout-btn, .create-btn {
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 14px;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-        }
+/* CONTENT */
+.content { flex: 1; padding: 30px 40px; }
 
-        .logout-btn { background: #ef4444; color: #020617; }
-        .create-btn { background: #22c55e; color: #022c22; }
+/* PROFILE */
+.profile {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+.profile-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #020617;
+    padding: 10px 18px;
+    border-radius: 18px;
+}
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #22c55e;
+    color: #022c22;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
 
-        .container { max-width: 1000px; margin: 30px auto; }
+/* CARD */
+.card {
+    background: #0f172a;
+    padding: 22px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+}
+.label { font-size: 13px; color: #94a3b8; }
+.value { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.desc { color: #c7d2fe; margin-bottom: 10px; }
 
-        /* ---------------- Search Bar ---------------- */
-        .search-bar {
-            width: 100%;
-            padding: 14px 18px;
-            margin-bottom: 25px;
-            border-radius: 14px;
-            border: none;
-            font-size: 15px;
-            background: #020617;
-            color: #e5e7eb;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-            outline: none;
-        }
+.skills span {
+    background: #4338ca;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-right: 6px;
+}
 
-        /* ---------------- Project Card ---------------- */
-        .project-card {
-            background: #0f172a;
-            padding: 22px;
-            border-radius: 18px;
-            margin-bottom: 24px;
-            box-shadow: 0 14px 28px rgba(0,0,0,0.45);
-        }
+/* ACTIONS */
+.actions { display: flex; gap: 10px; margin-top: 14px; }
+.actions a, .actions button {
+    padding: 8px 18px;
+    border-radius: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+}
+.view { background: #22c55e; color: #022c22; }
+.edit { background: #facc15; color: #3b2f0b; }
+.delete { background: #ef4444; color: #020617; }
+.accept { background: #22c55e; }
+.reject { background: #ef4444; }
 
-        .label { font-size: 13px; color: #94a3b8; margin-bottom: 2px; }
-        .value { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
-        .desc { color: #c7d2fe; margin-bottom: 12px; line-height: 1.5; }
-        .meta { font-size: 12px; color: #a5b4fc; margin-bottom: 6px; }
+/* TABLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 14px;
+    border-bottom: 1px solid #334155;
+}
 
-        .skills span {
-            display: inline-block;
-            background: #1e40af;
-            color: #dbeafe;
-            padding: 5px 10px;
-            border-radius: 14px;
-            font-size: 12px;
-            margin: 3px 4px 3px 0;
-        }
+/* REVIEW */
+.review-box textarea, .review-box input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: #1e293b;
+    color: #fff;
+    border: 1px solid #334155;
+}
+.stats { display: flex; gap: 30px; margin-top: 10px; margin-bottom: 20px; }
+.stat { background: #020617; padding: 12px 18px; border-radius: 14px; font-weight: bold; }
 
-        .actions a, .proposal-actions button {
-            display: inline-block;
-            margin-top: 10px;
-            margin-right: 10px;
-            padding: 8px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 13px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .view { background: #22c55e; color: #022c22; }
-        .edit { background: #facc15; color: #3b2f0b; }
-        .delete { background: #ef4444; color: #020617; }
-
-        /* ---------------- Proposal Card ---------------- */
-        .proposal-card {
-            background: #1e293b;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        }
-
-        .proposal-status {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 6px;
-        }
-
-        .accepted { background: #22c55e; color: #022c22; }
-        .rejected { background: #ef4444; color: #020617; }
-        .pending { background: #facc15; color: #3b2f0b; }
-
-        /* ---------------- Contracts Table ---------------- */
-        .contracts-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-        }
-        .contracts-table th, .contracts-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #334155;
-            text-align: left;
-        }
-        .contracts-table th { color: #94a3b8; }
-        .contracts-table td a {
-            background: #22c55e;
-            color: #022c22;
-            padding: 6px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: bold;
-        }
-    </style>
+/* NOTIFICATION */
+.notification-card {
+    background: #020617;
+    padding: 12px 18px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.notification-card.unread { border-left: 4px solid #22c55e; }
+.btn.green { background: #22c55e; color: #022c22; padding: 6px 12px; border-radius: 12px; text-decoration: none; font-weight: bold; }
+</style>
 </head>
 <body>
+<div class="layout">
 
-<div class="navbar">
-    <h2>Welcome, {{ request.user.username }}</h2>
-    <div>
-        <a href="{% url 'create_project' %}" class="create-btn">Create Project</a>
-        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h2>TalentLink</h2>
+    <a onclick="showSection('dashboard')">Dashboard</a>
+    <a onclick="showSection('projects')">Projects</a>
+    <a onclick="showSection('proposals')">Proposals</a>
+    <a onclick="showSection('contracts')">Contracts</a>
+    <a onclick="showSection('notifications')">
+    Notifications
+    {% if unread_count > 0 %}
+        ({{ unread_count }})
+    {% endif %}
+</a>
+
+    <a href="{% url 'create_project' %}" class="create-btn">+ Create Project</a>
+    <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- PROFILE -->
+<div class="profile">
+    <div class="profile-box">
+        <div class="avatar">{{ request.user.username|first|upper }}</div>
+        <div>
+            <strong>{{ request.user.username }}</strong><br>
+            <small>Client</small>
+        </div>
     </div>
 </div>
 
-<div class="container">
+<!-- DASHBOARD -->
+<div id="dashboardSection">
+    <h1>Welcome, {{ request.user.username }} 🚀</h1>
+    <div class="stats">
+        <div class="stat">Projects: <b>{{ projects|length }}</b></div>
+        <div class="stat">
+            Proposals: <b>
+            {% with total=0 %}
+            {% for project in projects %}
+                {% with total=total|add:project.proposals.count %}
+                {% endwith %}
+            {% endfor %}
+            {{ total }}
+            {% endwith %}
+            </b>
+        </div>
+        <div class="stat">
+            Budget: ₹ <b>
+            {% with total_budget=0 %}
+            {% for project in projects %}
+                {% with total_budget=total_budget|add:project.budget %}
+                {% endwith %}
+            {% endfor %}
+            {{ total_budget }}
+            {% endwith %}
+            </b>
+        </div>
+    </div>
+</div>
 
-    <!-- 🔍 Search Bar -->
-    <input
-        type="text"
-        id="projectSearch"
-        class="search-bar"
-        placeholder="Search project by title..."
-        onkeyup="searchProjects()"
-    >
+<!-- PROJECTS -->
+<div id="projectsSection" style="display:none;">
+{% for project in projects %}
+<div class="card">
+    <div class="value">{{ project.title }}</div>
+    <div class="desc">{{ project.description }}</div>
+    <div>Budget: ₹{{ project.budget }}</div>
+    <div class="skills">
+        {% for skill in project.skills_required.all %}
+        <span>{{ skill.name }}</span>
+        {% endfor %}
+    </div>
+    <div class="actions">
+        <a href="{% url 'project_detail' project_id=project.id %}" class="view">View</a>
+        <a href="{% url 'update_project' pk=project.id %}" class="edit">Edit</a>
+        <form method="POST" action="{% url 'delete_project' pk=project.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button class="delete">Delete</button>
+        </form>
+    </div>
+</div>
+{% empty %}
+<p>No projects yet.</p>
+{% endfor %}
+</div>
 
-    <!-- ---------------- Projects ---------------- -->
+<!-- PROPOSALS -->
+<div id="proposalsSection" style="display:none; padding:20px; background:#0f1117; border-radius:12px; color:#e5e7eb;">
+    <h2 style="margin-bottom:15px; color:#facc15;">Proposals</h2>
+
     {% for project in projects %}
-    <div class="project-card project-item">
+        <h3 style="margin-top:25px; margin-bottom:10px; color:#38bdf8;">{{ project.title }}</h3>
 
-        <div class="label">Title</div>
-        <div class="value project-title">{{ project.title }}</div>
+        <div style="display:flex; flex-wrap:wrap; gap:15px; margin-top:10px;">
+            {% for proposal in project.proposals.all %}
 
-        <div class="label">Description</div>
-        <div class="desc">{{ project.description }}</div>
+            
+            <div style="
+                border:1px solid #27272a;
+                border-radius:12px;
+                padding:15px;
+                width:220px;
+                background: {% if proposal.status|upper == 'ACCEPTED' %}#052e16{% elif proposal.status|upper == 'REJECTED' %}#450a0a{% else %}#1f2937{% endif %};
+                box-shadow:0 2px 6px rgba(0,0,0,0.5);
+                transition: transform 0.2s, box-shadow 0.2s;
+            "
+            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.6)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.5)';">
 
-        <div class="label">Budget</div>
-        <div class="value">₹ {{ project.budget }}</div>
+                <p><strong>Freelancer:</strong> {{ proposal.freelancer.user.username }}</p>
+                <p><strong>Bid:</strong> ₹{{ proposal.bid_amount|floatformat:2 }}</p>
 
-        <div class="label">Deadline</div>
-        <div class="value">{{ project.deadline }}</div>
+                <p><strong>Status:</strong>
+                    {% if proposal.status|upper == "ACCEPTED" %}
+                        <span style="color:#22c55e; font-weight:bold;">ACCEPTED</span>
+                    {% elif proposal.status|upper == "REJECTED" %}
+                        <span style="color:#ef4444; font-weight:bold;">REJECTED</span>
+                    {% else %}
+                        <span style="color:#fbbf24; font-weight:bold;">PENDING</span>
+                    {% endif %}
+                </p>
 
-        <div class="label">Skills</div>
-        <div class="skills">
-            {% for skill in project.skills_required.all %}
-                <span>{{ skill.name }}</span>
+                {% if proposal.status|upper == "PENDING" %}
+                <div style="margin-top:10px; display:flex; gap:10px;">
+                    <form method="POST" action="{% url 'accept_proposal' proposal.id %}">
+                        {% csrf_token %}
+                        <button type="submit" style="
+                            background:#22c55e; color:#000; border:none;
+                            padding:6px 12px; border-radius:8px; cursor:pointer;">
+                            Accept
+                        </button>
+                    </form>
+
+                    <form method="POST" action="{% url 'reject_proposal' proposal.id %}">
+                        {% csrf_token %}
+                        <button type="submit" style="
+                            background:#ef4444; color:#fff; border:none;
+                            padding:6px 12px; border-radius:8px; cursor:pointer;">
+                            Reject
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if proposal.contract %}
+                    <a href="{% url 'contract_chat' proposal.contract.id %}" style="
+                        display:inline-block; margin-top:10px;
+                        padding:6px 12px; border-radius:8px;
+                        background:#38bdf8; color:#020617;
+                        font-weight:bold; text-decoration:none;">
+                        Go to Contract Chat
+                    </a>
+                {% endif %}
+
+            </div>
+
             {% empty %}
-                <span>Not specified</span>
+                <p style="color:#94a3b8;">No proposals for this project.</p>
             {% endfor %}
         </div>
 
-        <div class="meta">Created: {{ project.created_at }}</div>
-        <div class="meta">Updated: {{ project.updated_at }}</div>
-
-        <div class="actions">
-            <a href="{% url 'project_detail' project.id %}" class="view">View</a>
-            <a href="{% url 'update_project' project.id %}" class="edit">Update</a>
-            <form action="{% url 'delete_project' project.pk %}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this project?');">
-                {% csrf_token %}
-                <button type="submit" class="delete">Delete</button>
-            </form>
-        </div>
-
-        <!-- ---------------- Proposals ---------------- -->
-        <h4>Proposals:</h4>
-        {% for proposal in project.proposals.all %}
-        <div class="proposal-card">
-            <p><strong>Freelancer:</strong> {{ proposal.freelancer.user.username }}</p>
-            <p><strong>Bid:</strong> ₹{{ proposal.bid_amount }}</p>
-
-            <span class="proposal-status {{ proposal.status|lower }}">
-                {{ proposal.status }}
-            </span>
-
-            {% if request.user == project.client and proposal.status == "pending" %}
-            <form method="post" action="{% url 'update_proposal_status' proposal.id %}">
-                {% csrf_token %}
-                <button type="submit" name="status" value="accepted">Accept</button>
-                <button type="submit" name="status" value="rejected">Reject</button>
-            </form>
-            {% endif %}
-        </div>
-        {% endfor %}
-    </div>
     {% empty %}
-        <p>No projects posted yet.</p>
+        <p style="color:#94a3b8;">No projects yet.</p>
     {% endfor %}
+</div>
+{% load static %}
+{% load custom_filters %}
 
-    <!-- ---------------- Contracts ---------------- -->
-    <h3>Your Contracts</h3>
-    {% if contracts %}
-    <table class="contracts-table">
-        <tr>
-            <th>Project</th>
-            <th>Freelancer</th>
-            <th>Status</th>
-            <th>Chat</th>
+<div id="contractsSection" style="display:block; padding:20px; background:#0f1117; border-radius:12px; color:#e5e7eb;">
+    <h2 style="margin-bottom:15px; color:#22c55e;">Contracts</h2>
+
+    <table style="width:100%; border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #334155;">
+            <th style="padding:12px;">Project</th>
+            <th style="padding:12px;">Freelancer</th>
+            <th style="padding:12px;">Status</th>
+            <th style="padding:12px;">Actions / Review</th>
+            <th style="padding:12px;">Chat</th>
         </tr>
+
         {% for contract in contracts %}
+        <tr style="
+            {% if contract.status == 'ACTIVE' %}background:#052e16;
+            {% elif contract.status == 'COMPLETED' %}background:#1e293b;
+            {% elif contract.status == 'CANCELLED' %}background:#450a0a;
+            {% endif %}">
+            
+            <td style="padding:12px;">{{ contract.project.title }}</td>
+            <td style="padding:12px;">{{ contract.freelancer.user.username }}</td>
+
+            <td style="padding:12px; font-weight:bold;">
+                {% if contract.status == 'ACTIVE' %}
+                    <span style="color:#22c55e;">ACTIVE</span>
+                {% elif contract.status == 'COMPLETED' %}
+                    <span style="color:#38bdf8;">COMPLETED</span>
+                {% elif contract.status == 'CANCELLED' %}
+                    <span style="color:#ef4444;">CANCELLED</span>
+                {% endif %}
+            </td>
+
+            <td style="padding:12px;">
+                {% if contract.status == 'ACTIVE' %}
+                    <form method="POST" action="{% url 'complete_contract' contract.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button class="green" type="submit">Mark Completed</button>
+                    </form>
+
+                    <form method="POST" action="{% url 'cancel_contract' contract.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button class="red" type="submit">Cancel</button>
+                    </form>
+
+                {% elif contract.status == 'COMPLETED' %}
+                    {% if contract_reviews|get_item:contract.id %}
+                        <span style="color:#22c55e; font-weight:bold;">Reviewed</span>
+                    {% else %}
+                        <button class="green" onclick="toggleReviewForm({{ contract.id }})">Write Review</button>
+
+                        <form id="reviewForm{{ contract.id }}" method="POST" action="{% url 'submit_review' contract.id %}" style="display:none; margin-top:10px;">
+                            {% csrf_token %}
+                            <input type="number" name="rating" min="1" max="5" placeholder="Rating" required>
+                            <textarea name="comment" placeholder="Write your review" required></textarea>
+                            <button type="submit" class="green">Submit Review</button>
+                        </form>
+                    {% endif %}
+
+                {% elif contract.status == 'CANCELLED' %}
+                    <span style="color:#ef4444;">Cancelled</span>
+                {% endif %}
+            </td>
+
+            <td style="padding:12px;">
+                <a href="{% url 'contract_chat' contract.id %}" class="green">Chat</a>
+            </td>
+        </tr>
+
+        {% empty %}
         <tr>
-            <td>{{ contract.project.title }}</td>
-            <td>{{ contract.freelancer.user.username }}</td>
-            <td>{{ contract.status }}</td>
-            <td>
-                <a href="{% url 'contract_chat' contract.id %}">Chat</a>
+            <td colspan="5" style="padding:20px; text-align:center; color:#94a3b8;">
+                No contracts yet.
             </td>
         </tr>
         {% endfor %}
     </table>
-    {% else %}
-        <p>No contracts yet.</p>
-    {% endif %}
-
 </div>
 
+
+<!-- Notifications Section -->
+<!-- CSRF token -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<div id="notificationsSection">
+    <h3>Notifications</h3>
+
+    {% if notifications %}
+        <button onclick="deleteAllNotifications()" class="btn red">Delete All</button><br><br>
+
+        {% for notif in notifications %}
+            <div class="notification-card {% if not notif.is_read %}unread{% endif %}" id="notifCard{{ notif.id }}">
+                <div>
+                    {{ notif.message }}<br>
+                    <small style="color:#94a3b8;">{{ notif.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+
+                {% if not notif.is_read %}
+                    <button onclick="markRead({{ notif.id }})" class="btn green">Mark Read</button>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No notifications yet.</p>
+    {% endif %}
+</div>
+
+
 <script>
-function searchProjects() {
-    const input = document.getElementById("projectSearch").value.toLowerCase();
-    const projects = document.getElementsByClassName("project-item");
+function markRead(notifId) {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    for (let i = 0; i < projects.length; i++) {
-        const title = projects[i]
-            .getElementsByClassName("project-title")[0]
-            .innerText.toLowerCase();
+    fetch(`/notification/read/${notifId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success === true) {
+            const card = document.getElementById("notifCard" + notifId);
+            if (card) card.remove();
+        } else {
+            alert("Failed to mark as read: " + (data.error || "Unknown"));
+        }
+    })
+    .catch(err => console.error(err));
+}
 
-        projects[i].style.display = title.includes(input) ? "" : "none";
+function deleteAllNotifications() {
+    if(!confirm("Delete all notifications?")) return;
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch(`/notifications/clear_all/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success === true) {
+            // Remove all cards from DOM
+            document.querySelectorAll(".notification-card").forEach(el => el.remove());
+        } else {
+            alert("Failed to delete all notifications");
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+
+function showSection(section) {
+    const sections = ['dashboard','projects','proposals','contracts','notifications'];
+    sections.forEach(s => {
+        const el = document.getElementById(s + 'Section');
+        if(el) el.style.display = 'none';
+    });
+    const showEl = document.getElementById(section + 'Section');
+    if(showEl) showEl.style.display = 'block';
+}
+
+function toggleReviewForm(contractId) {
+    var form = document.getElementById("reviewForm" + contractId);
+    if(form.style.display === "none") {
+        form.style.display = "block";
+    } else {
+        form.style.display = "none";
     }
 }
-</script>
+function submitReview(e, contractId) {
+    e.preventDefault(); // prevent normal submit
+    const form = e.target;
+    const rating = form.rating.value;
+    const comment = form.comment.value;
 
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ rating, comment })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Hide review form
+            document.getElementById('reviewFormRow' + contractId).style.display = 'none';
+            // Update button / span to "Reviewed"
+            document.getElementById('reviewStatus' + contractId).innerHTML = "Reviewed";
+        } else {
+            alert(data.error || 'Error submitting review.');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Server error. Please try again.');
+    });
+}
+</script>
+</div>
 </body>
 </html>

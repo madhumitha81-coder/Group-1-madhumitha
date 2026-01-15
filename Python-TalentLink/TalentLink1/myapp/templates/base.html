@@ -1,78 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Auth System{% endblock %}</title>
-
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: auto;
-            padding: 40px 20px;
-        }
-
-        header {
-            text-align: center;
-            color: #fff;
-            margin-bottom: 40px;
-        }
-
-        header h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
-        }
-
-        header hr {
-            width: 80px;
-            border: 2px solid #fff;
-            border-radius: 10px;
-        }
-
-        .content-card {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
-        }
-
-        .message {
-            padding: 12px 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            background: #e6fffa;
-            color: #065f46;
-            font-weight: 500;
-        }
-    </style>
+    <title>Your App</title>
 </head>
-
 <body>
 
-    <header>
-        <h1>Django Authentication System</h1>
-        <hr>
-    </header>
+<!-- 🔔 NOTIFICATION CONTAINER -->
+<div id="notificationBox"
+     style="position:fixed; top:60px; right:20px; width:300px; background:#fff; box-shadow:0 0 10px rgba(0,0,0,0.2); z-index:999;">
+</div>
 
-    <div class="container">
+{% block content %}{% endblock %}
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="message">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
+<!-- 🔥 WRITE SCRIPT AT VERY END -->
+<script>
+function loadNotifications() {
+    fetch("{% url 'get_notifications' %}")
+        .then(res => res.json())
+        .then(data => {
+            let box = document.getElementById("notificationBox");
+            if (!box) return;
 
-        <div class="content-card">
-            {% block content %}{% endblock %}
-        </div>
+            box.innerHTML = "";
 
-    </div>
+            data.notifications.forEach(n => {
+                let div = document.createElement("div");
+                div.innerHTML = n.message;
+                div.style.cursor = "pointer";
+                div.style.padding = "10px";
+                div.style.borderBottom = "1px solid #ddd";
+
+                div.onclick = function () {
+                    fetch(`/notifications/read/${n.id}/`)
+                        .then(() => div.remove());
+                };
+
+                box.appendChild(div);
+            });
+        });
+}
+
+setInterval(loadNotifications, 3000);
+loadNotifications();
+</script>
 
 </body>
 </html>

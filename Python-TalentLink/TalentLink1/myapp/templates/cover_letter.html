@@ -1,0 +1,195 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contract Agreement</title>
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            background: #f8fafc;
+            padding: 40px;
+            color: #020617;
+        }
+
+        .contract-box {
+            max-width: 850px;
+            margin: auto;
+            background: #ffffff;
+            padding: 40px;
+            border: 1px solid #cbd5f5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: 18px;
+            text-align: left;
+            border-bottom: 1px solid #cbd5f5;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+
+        p, li {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        ol, ul {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+
+        .signature {
+            margin-top: 80px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature div {
+            width: 45%;
+            text-align: center;
+        }
+
+        .signature-line {
+            margin-top: 60px;
+            border-top: 1px solid #020617;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .signature-name {
+            margin-top: 8px;
+        }
+
+        .date-line {
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .print-btn {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-weight: bold;
+            background: #22c55e;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            color: #fff;
+        }
+
+        @media print {
+            .print-btn {
+                display: none;
+            }
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contract-box">
+    <h1>Freelance Project Agreement</h1>
+    <p><strong>Date:</strong> {{ contract.created_at|date:"F d, Y" }}</p>
+
+    <p>This Agreement is made between:</p>
+    <ul>
+        <li><strong>Client:</strong> {{ contract.project.client.user.username }} ({{ contract.project.client.user.email }})</li>
+        <li><strong>Freelancer:</strong> {{ contract.freelancer.user.username }} ({{ contract.freelancer.user.email }})</li>
+    </ul>
+
+    <h2>Project Details</h2>
+    <p><strong>Project Title:</strong> {{ contract.project.title }}</p>
+    <p><strong>Description:</strong> {{ contract.project.description|default:"No description provided." }}</p>
+    <p><strong>Proposed Budget:</strong> ₹{{ contract.project.budget }}</p>
+    <p><strong>Deadline:</strong> {{ contract.project.deadline|date:"F d, Y" }}</p>
+
+    <h2>Scope of Work</h2>
+    <ol>
+        <li>The Freelancer will deliver work according to the specifications outlined in the project description.</li>
+        <li>All deliverables must meet the quality standards agreed upon with the Client.</li>
+        <li>Freelancer will provide regular updates on project progress as requested by the Client.</li>
+    </ol>
+
+    <h2>Payment Terms</h2>
+    <ol>
+        <li>Payment will be released as per agreed milestones. Total agreed amount: ₹{{ contract.project.budget }}.</li>
+        <li>Payments will be made upon completion and approval of deliverables.</li>
+        <li>Late payments by the Client will incur a delay notice of up to 7 days before any action.</li>
+    </ol>
+
+    <h2>Timeline & Milestones</h2>
+    <ol>
+        <li>The Freelancer agrees to complete milestones within the timeline mentioned in the project details.</li>
+        <li>Any delays must be communicated to the Client immediately.</li>
+        <li>Extension of deadlines requires written consent from both parties.</li>
+    </ol>
+
+    <h2>Confidentiality</h2>
+    <ol>
+        <li>Both parties agree to maintain the confidentiality of project details and sensitive information.</li>
+        <li>No confidential information shall be disclosed to any third party without prior written consent.</li>
+    </ol>
+
+    <h2>Intellectual Property</h2>
+    <ol>
+        <li>All intellectual property rights of the work produced will belong to the Client upon full payment.</li>
+        <li>The Freelancer retains the right to display the work in their portfolio with prior consent from the Client.</li>
+    </ol>
+
+    <h2>Revision Policy</h2>
+    <ol>
+        <li>The Client is entitled to request up to 2 revisions per milestone without additional charge.</li>
+        <li>Additional revisions may incur extra fees, mutually agreed upon by both parties.</li>
+    </ol>
+
+    <h2>Termination</h2>
+    <ol>
+        <li>Either party may terminate the agreement with a written notice of 7 days.</li>
+        <li>Payments for completed work must be settled upon termination.</li>
+        <li>Any breach of terms may result in immediate termination.</li>
+    </ol>
+
+    <h2>Dispute Resolution</h2>
+    <ol>
+        <li>Any disputes arising under this agreement shall be resolved amicably through mutual discussion.</li>
+        <li>If unresolved, disputes will be subject to the laws of the jurisdiction of the Client.</li>
+    </ol>
+
+    <div class="page-break"></div>
+
+    <h2>Signatures</h2>
+    <div class="signature">
+        <div>
+            <div class="signature-line"></div>
+            <div class="signature-name"><strong>Client:</strong> {{ contract.project.client.user.username }}</div>
+            <div class="date-line">Date: ____________</div>
+        </div>
+
+        <div>
+            <div class="signature-line"></div>
+            <div class="signature-name"><strong>Freelancer:</strong> {{ contract.freelancer.user.username }}</div>
+            <div class="date-line">Date: ____________</div>
+        </div>
+    </div>
+
+    <div class="print-btn">
+        <button onclick="window.print()">Print Contract</button>
+    </div>
+</div>
+
+</body>
+</html>

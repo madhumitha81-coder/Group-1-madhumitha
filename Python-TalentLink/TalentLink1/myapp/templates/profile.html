@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Profile</title>
+    <style>
+        body{
+            background:#0f172a;
+            color:#e5e7eb;
+            font-family:"Segoe UI";
+            padding:30px;
+        }
+
+        .profile-container{
+            max-width:900px;
+            margin:auto;
+        }
+
+        .profile-header{
+            display:flex;
+            align-items:center;
+            gap:20px;
+            background:#1e293b;
+            padding:20px;
+            border-radius:16px;
+        }
+
+        .avatar{
+            width:120px;
+            height:120px;
+            border-radius:50%;
+            overflow:hidden;
+            background:#334155;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:42px;
+            font-weight:bold;
+        }
+
+        .avatar img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+
+        .profile-info h2{ margin:0; }
+        .role{ color:#94a3b8; font-size:14px; }
+
+        .section{
+            background:#1e293b;
+            padding:20px;
+            border-radius:16px;
+            margin-top:20px;
+        }
+
+        label{
+            font-size:13px;
+            color:#94a3b8;
+        }
+
+        input, textarea{
+            width:100%;
+            padding:10px;
+            margin-top:6px;
+            border-radius:10px;
+            border:none;
+            background:#0f172a;
+            color:#fff;
+        }
+
+        .btn{
+            margin-top:12px;
+            padding:10px 18px;
+            border:none;
+            border-radius:10px;
+            background:#22c55e;
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        .review-card{
+            background:#0f172a;
+            padding:14px;
+            border-radius:12px;
+            margin-top:12px;
+        }
+
+        .review-card small{
+            color:#94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="profile-container">
+
+<!-- PROFILE HEADER -->
+<div class="profile-header">
+    <div class="avatar">
+        {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}">
+        {% else %}
+            {{ request.user.username|first|upper }}
+        {% endif %}
+    </div>
+
+    <div class="profile-info">
+        <h2>{{ request.user.username }}</h2>
+        <div class="role">{{ profile.role|capfirst }}</div>
+        <div>{{ profile.location }}</div>
+    </div>
+</div>
+
+<!-- EDIT PROFILE -->
+<div class="section">
+    <h3>Edit Profile</h3>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <label>Profile Picture</label>
+        <input type="file" name="avatar">
+
+        <label>About Yourself</label>
+        <textarea name="bio">{{ profile.bio }}</textarea>
+
+        <label>Skills (comma separated)</label>
+        <input type="text" name="skills" value="{% for s in profile.skills.all %}{{ s.name }},{% endfor %}">
+
+        <label>Portfolio</label>
+        <textarea name="portfolio">{{ profile.portfolio }}</textarea>
+
+        <label>Location</label>
+        <input type="text" name="location" value="{{ profile.location }}">
+
+        <label>Availability</label>
+        <select name="availability">
+            <option value="True" {% if profile.availability %}selected{% endif %}>Available</option>
+            <option value="False" {% if not profile.availability %}selected{% endif %}>Not Available</option>
+        </select>
+
+        <button class="btn">Save Profile</button>
+    </form>
+</div>
+
+<!-- REVIEWS (ONLY FREELANCER) -->
+{% if profile.role == "freelancer" %}
+<div class="section">
+    <h3>Client Reviews</h3>
+
+    {% if reviews %}
+        {% for review in reviews %}
+        <div class="review-card">
+            <strong>{{ review.reviewer_name }}</strong><br>
+            Rating: {{ review.rating }} ⭐<br>
+            {{ review.comment }}<br>
+            <small>{{ review.created_at|date:"M d, Y" }}</small>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No reviews yet.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+</div>
+
+</body>
+</html>

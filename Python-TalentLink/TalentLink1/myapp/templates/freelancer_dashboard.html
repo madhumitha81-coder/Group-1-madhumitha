@@ -5,197 +5,481 @@
 <head>
     <title>Freelancer Dashboard</title>
     <style>
-        body { 
-            background: #0f172a; 
-            font-family: "Segoe UI"; 
-            color: #e5e7eb; 
-            margin:0; 
-            padding:20px;
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background:#0f172a;
+            color:#e5e7eb;
         }
 
-        .header { 
-            display:flex; 
-            justify-content:space-between; 
-            align-items:center; 
-            margin-bottom:20px; 
+        .layout {
+            display: flex;
+            min-height: 100vh;
         }
 
-        h1 { margin:0; }
-
-        .logout-btn { 
-            background:#ef4444; 
-            color:#020617; 
-            padding:8px 16px; 
-            border-radius:10px; 
-            text-decoration:none; 
-            font-weight:bold; 
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            background: #020617;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        .notif-btn{
-            background:#22c55e;
-            color:#020617;
-            padding:8px 14px;
-            border-radius:10px;
-            font-weight:bold;
-            text-decoration:none;
-            margin-right:10px;
-            display:flex;
-            align-items:center;
-            gap:6px;
-        }
+        .sidebar .logout-btn{
+    margin-top:20px;
+    background:#22c55e;
+    color:#020617;
 
-        .badge{
+    padding:18px 20px;
+    font-size:18px;
+    font-weight:700;
+
+    border-radius:18px;
+    text-align:center;
+    text-decoration:none;
+
+    box-shadow: 0 6px 16px rgba(34,197,94,0.3);
+}
+
+
+        /* BIG SIDEBAR BUTTONS */
+.sidebar button{
+    width:100%;
+    background:#38bdf8;
+    color:#020617;
+
+    border:none;
+    border-radius:18px;
+
+    padding:18px 20px;      /* BIG height */
+    font-size:18px;         /* BIG text */
+    font-weight:700;
+
+    text-align:left;
+    cursor:pointer;
+    transition: all 0.25s ease;
+
+    box-shadow: 0 6px 16px rgba(56,189,248,0.25);
+}
+
+.sidebar button:hover{
+    background:#60a5fa;
+    transform: translateY(-2px);
+}
+
+       
+        .badge {
             background:#020617;
             color:#22c55e;
             padding:2px 8px;
             border-radius:50%;
             font-size:12px;
             font-weight:700;
+            float:right;
         }
 
-        .search-box { margin-bottom: 25px; display:flex; gap:10px; }
-        .search-box input { flex:1; padding:10px; border-radius:10px; border:none; font-size:14px; }
-        .search-box button { padding:10px 18px; border-radius:10px; border:none; background:#38bdf8; color:#020617; font-weight:bold; cursor:pointer; }
+        /* CONTENT AREA */
+        .content {
+            flex: 1;
+            padding: 20px 30px;
+            overflow-x: hidden;
+        }
 
-        .project-card { background:#1e293b; padding:20px; border-radius:14px; margin-bottom:20px; }
-        .label { font-size:13px; color:#94a3b8; margin-top:10px; }
-        .value { font-size:15px; font-weight:500; margin-top:3px; }
-        .btn { display:inline-block; padding:8px 16px; margin-top:10px; margin-right:10px; border-radius:10px; font-weight:bold; text-decoration:none; }
-        .blue { background:#38bdf8; color:#020617; }
-        .green { background:#22c55e; color:#020617; }
+        /* SECTION CARDS */
+        .section-content {
+            display:none;
+        }
 
-        .contracts-section { margin-top:40px; }
-        .contract-card { background:#1e293b; padding:16px; border-radius:12px; margin-bottom:16px; }
-        .review-box input, .review-box textarea { width:100%; padding:8px; border-radius:8px; border:1px solid #334155; margin-bottom:6px; background:#0f172a; color:#fff; }
-        .review-box button { background:#22c55e; color:#022c22; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; }
+        .project-card,
+        .contract-card,
+        .notification-card {
+            background:#1e293b;
+            padding:18px;
+            border-radius:14px;
+            margin-bottom:15px;
+        }
 
-        .notification-card{ background:#1e293b; padding:16px; border-radius:12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+        .btn{
+    display:inline-flex;              /* prevents stretching */
+    align-items:center;
+    justify-content:center;
+
+    padding:6px 14px;                 /* controlled size */
+    margin-top:8px;
+    margin-right:8px;
+
+    border-radius:8px;                /* clean, not bulky */
+    font-size:14px;                   /* normal readable */
+    font-weight:600;
+
+    text-decoration:none;
+    white-space:nowrap;               /* prevents line breaks */
+}
+
+
+        .blue{ background:#38bdf8; color:#020617; }
+        .green{ background:#22c55e; color:#020617; }
         .unread{ font-weight:700; }
+
+        .search-box{
+            display:flex;
+            margin-bottom:20px;
+            gap:10px;
+        }
+        .search-box input{
+            flex:1;
+            padding:10px;
+            border-radius:10px;
+            border:none;
+        }
+        .search-box button{
+            padding:10px 18px;
+            border-radius:10px;
+            border:none;
+            background:#38bdf8;
+            font-weight:bold;
+            cursor:pointer;
+        }
+.profile{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:20px;
+}
+
+.profile-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#020617;
+    padding:10px 18px;
+    border-radius:18px;
+    text-decoration:none;
+    color:#e5e7eb;
+}
+
+.profile-box:hover{
+    background:#1e293b;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:#22c55e;
+    color:#022c22;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:16px;
+}
+
+.avatar-img{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.profile-info small{
+    color:#94a3b8;
+    font-size:12px;
+}
+
+/* TOP BIG ACTION BUTTONS */
+.top-actions{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap:16px;
+    margin-bottom:25px;
+}
+
+.top-actions button{
+    background:#38bdf8;
+    color:#020617;
+
+    border:none;
+    border-radius:18px;
+
+    padding:22px;
+    font-size:20px;
+    font-weight:800;
+
+    cursor:pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 20px rgba(56,189,248,0.3);
+}
+
+.top-actions button:hover{
+    background:#60a5fa;
+    transform: translateY(-3px);
+}
+
+/* Notification badge inside big buttons */
+.top-actions .badge{
+    background:#020617;
+    color:#22c55e;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:14px;
+    margin-left:8px;
+}
+
+.section-content {
+    display: none; /* hide all sections by default */
+}
+#projectsSection {
+    display: block; /* show Projects by default */
+}
+
+.alert {
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    border-radius: 14px;
+    font-weight: 700;
+}
+
+.alert.success {
+    background: #22c55e;
+    color: #022c22;
+}
+
+.alert.error {
+    background: #ef4444;
+    color: #020617;
+}
+
+.alert.info {
+    background: #38bdf8;
+    color: #020617;
+}
 
     </style>
 </head>
 
 <body>
 
-<div class="header">
-    <h1>Freelancer Dashboard</h1>
-    <div style="display:flex;align-items:center;">
-        <a href="#notifications" class="notif-btn">
-            Notifications
-            {% if unread_count > 0 %}
-                <span class="badge" id="notifBadge">{{ unread_count }}</span>
-            {% endif %}
-        </a>
-        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+<div class="layout">
+    
+    <!-- CONTENT -->
+    <div class="content">
+    <!-- DJANGO MESSAGES -->
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {{ message.tags }}">
+      {{ message }}
     </div>
-</div>
-
-<!-- SEARCH -->
-<form method="get" class="search-box">
-    <input type="text" name="q" placeholder="Search projects..." value="{{ request.GET.q }}">
-    <button type="submit">Search</button>
-</form>
-
-<!-- PROJECTS -->
-<h2>Projects</h2>
-{% for project in projects %}
-<div class="project-card">
-    <div class="label">Project</div>
-    <div class="value">{{ project.title }}</div>
-
-    <div class="label">Description</div>
-    <div class="value">{{ project.description }}</div>
-
-    <div class="label">Client</div>
-    <div class="value">{{ project.client.username }}</div>
-
-    <a href="{% url 'project_detail' project.id %}" class="btn blue">View Details</a>
-    <a href="{% url 'submit_proposal' project.id %}" class="btn green">Submit Proposal</a>
-</div>
-{% empty %}
-<p>No projects found.</p>
-{% endfor %}
-
-
-<!-- CONTRACTS -->
-<h2 class="contracts-section">Your Contracts</h2>
-{% if contracts %}
-{% for contract in contracts %}
-<div class="contract-card">
-    <div><strong>Project:</strong> {{ contract.project.title }}</div>
-    <div><strong>Client:</strong> {{ contract.client.user.username }}</div>
-    <div><strong>Status:</strong> {{ contract.status|capfirst }}</div>
-
-    <div style="margin-top:8px;">
-        <a href="{% url 'contract_chat' contract.id %}" class="btn blue">Chat</a>
-    </div>
-</div>
-{% endfor %}
-{% else %}
-<p>No contracts yet.</p>
+  {% endfor %}
 {% endif %}
 
-<!-- NOTIFICATIONS -->
-<!-- CSRF token -->
-<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    <div>
+        <h2>Welcome Freelancer</h2>
+    </div>
+    <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
 
-<div id="notificationsSection">
-    <h3>Notifications</h3>
+    <!-- PROFILE -->
+<div class="profile">
+    <a href="{% url 'edit_profile' %}" class="notif-btn" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff;">
 
-    {% if notifications %}
-        <button onclick="deleteAllNotifications()" class="btn red">Delete All</button><br><br>
-
-        {% for notif in notifications %}
-            <div class="notification-card {% if not notif.is_read %}unread{% endif %}" id="notifCard{{ notif.id }}">
-                <div>
-                    {{ notif.message }}<br>
-                    <small style="color:#94a3b8;">{{ notif.created_at|date:"M d, Y H:i" }}</small>
-                </div>
-
-                {% if not notif.is_read %}
-                    <button onclick="markRead({{ notif.id }})" class="btn green">Mark Read</button>
-                {% endif %}
+        <!-- Avatar -->
+        {% if request.user.profile.avatar %}
+            <img src="{{ request.user.profile.avatar.url }}" alt="Avatar" class="avatar-img" style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
+        {% else %}
+            <div class="avatar" style="width:50px; height:50px; border-radius:50%; background:#334155; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                {{ request.user.username|first|upper }}
             </div>
+        {% endif %}
+
+        <!-- Name & Role -->
+        <div class="profile-info" style="line-height:1.2;">
+            <strong>{{ request.user.profile.name|default:request.user.username }}</strong><br>
+            <small style="color:#94a3b8;">{{ request.user.profile.role|capfirst }}</small>
+        </div>
+
+    </a>
+</div>
+
+        <!-- SEARCH -->
+        <form method="get" class="search-box">
+            <input type="text" name="q" placeholder="Search projects..." value="{{ request.GET.q }}">
+            <button type="submit">Search</button>
+        </form>
+        <div class="top-actions">
+    <button onclick="toggleSection('projectsSection')">
+        Projects
+    </button>
+    <button onclick="toggleSection('proposalsSection')">
+    Proposals
+</button>
+    <button onclick="toggleSection('contractsSection')">
+        Contracts
+    </button>
+
+    <button onclick="toggleSection('notificationsSection')">
+        Notifications
+        {% if unread_count > 0 %}
+            <span class="badge">{{ unread_count }}</span>
+        {% endif %}
+    </button>
+
+    <button onclick="toggleSection('reviewsSection')">
+        Project Reviews
+    </button>
+    
+</div>
+
+        <!-- PROJECTS -->
+        <div id="projectsSection" class="section-content">
+            {% for project in projects %}
+            <div class="project-card">
+                <div><strong>Project:</strong> {{ project.title }}</div>
+                <div><strong>Description:</strong> {{ project.description }}</div>
+                <div><strong>Client:</strong> {{ project.client.username }}</div>
+                <a href="{% url 'project_detail' project.id %}" class="btn blue">View Details</a>
+                <a href="{% url 'submit_proposal' project.id %}" class="btn green">Submit Proposal</a>
+            </div>
+            {% empty %}
+            <p>No projects found.</p>
+            {% endfor %}
+        </div>
+<!-- PROPOSALS -->
+{% load static %}
+
+<div id="proposalsSection" class="section-content">
+    <h2 style="color:#facc15;">My Proposals</h2>
+
+    {% if proposals %}
+        {% for proposal in proposals %}
+        <div style="border:1px solid #27272a; border-radius:12px; padding:15px; margin-bottom:15px; background:#1f2937;">
+
+            <p><strong>Project:</strong> {{ proposal.project.title }}</p>
+            <p><strong>Status:</strong> {{ proposal.status|upper }}</p>
+            <p><strong>Bid:</strong> ₹{{ proposal.bid_amount }}</p>
+
+            <!-- VIEW CLIENT PROFILE -->
+            <button onclick="document.getElementById('client{{ proposal.id }}').style.display='block';"
+                    style="padding:6px 12px; border-radius:6px; background:#38bdf8; border:none;">
+                View Client Profile
+            </button>
+
+            {% if proposal.contract %}
+                <a href="{% url 'contract_chat' proposal.contract.id %}"
+                   style="display:inline-block; margin-top:10px; background:#22c55e; padding:6px 12px; border-radius:6px; text-decoration:none;">
+                    Open Contract
+                </a>
+                
+            {% endif %}
+        </div>
+
+        <!-- CLIENT PROFILE MODAL -->
+        <div id="client{{ proposal.id }}"
+             style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+                    background:#1f2937; padding:20px; border-radius:12px; width:320px; z-index:1000;">
+
+            <h3 style="color:#facc15;">Client Profile</h3>
+
+            <p><strong>Name:</strong>
+                {{ proposal.project.client.first_name }}
+                {{ proposal.project.client.last_name }}
+            </p>
+
+            <p><strong>Username:</strong> {{ proposal.project.client.username }}</p>
+            <p><strong>Email:</strong> {{ proposal.project.client.email }}</p>
+
+            <p><strong>Bio:</strong>
+                {{ proposal.project.client.profile.bio|default:"No bio" }}
+            </p>
+
+            {% if proposal.project.client.profile.location %}
+                <p><strong>Location:</strong> {{ proposal.project.client.profile.location }}</p>
+            {% endif %}
+
+            {% if proposal.project.client.profile.avatar %}
+                <img src="{{ proposal.project.client.profile.avatar.url }}" width="80"
+                     style="border-radius:50%; border:2px solid #38bdf8;">
+            {% endif %}
+
+            <button onclick="document.getElementById('client{{ proposal.id }}').style.display='none';"
+                    style="margin-top:10px; background:#ef4444; padding:6px 12px; border:none; border-radius:6px;">
+                Close
+            </button>
+        </div>
+
         {% endfor %}
     {% else %}
-        <p>No notifications yet.</p>
+        <p style="color:#94a3b8;">You have not submitted any proposals yet.</p>
     {% endif %}
 </div>
 
+        <!-- CONTRACTS -->
+        <div id="contractsSection" class="section-content">
+            {% if contracts %}
+            {% for contract in contracts %}
+            <div class="contract-card">
+                <strong>Project:</strong> {{ contract.project.title }} <br>
+                <strong>Client:</strong> {{ contract.client.user.username }} <br>
+                <strong>Status:</strong> {{ contract.status|capfirst }} <br>
+                <a href="{% url 'contract_chat' contract.id %}" class="btn blue">Chat</a>
+                <a href="{% url 'contract_letter' contract.id %}" class="btn green">
+                    View Contract
+                </a>
 
-<h2>Project Reviews</h2>
-
-{% for contract in contracts %}
-    {% with review=reviews_by_contract|get_item:contract.id %}
-        {% if review %}
-        <div style="background:#1e293b; padding:15px; border-radius:8px; margin-bottom:10px;">
-            <strong>Project:</strong> {{ contract.project.title }} <br>
-            <strong>Client/Reviewer:</strong> {{ review.reviewer.username }} <br>
-            <strong>Rating:</strong> {{ review.rating }} ⭐ <br>
-            <strong>Comment:</strong> {{ review.comment }} <br>
-            <small>Reviewed on: {{ review.created_at|date:"d M Y" }}</small>
+                
+            </div>
+            {% endfor %}
+            {% else %}
+            <p>No contracts yet.</p>
+            {% endif %}
         </div>
-        {% endif %}
-    {% endwith %}
-{% empty %}
-    <p>No reviews yet.</p>
-{% endfor %}
+
+        <!-- NOTIFICATIONS -->
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <div id="notificationsSection" class="section-content">
+            {% if notifications %}
+                {% for notif in notifications %}
+                <div class="notification-card {% if not notif.is_read %}unread{% endif %}" id="notifCard{{ notif.id }}">
+                    <div>
+                        {{ notif.message }}<br>
+                        <small>{{ notif.created_at|date:"M d, Y H:i" }}</small>
+                    </div>
+                    {% if not notif.is_read %}
+                    <button onclick="markRead({{ notif.id }})" class="btn green">Mark Read</button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No notifications yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- REVIEWS -->
+        <div id="reviewsSection" class="section-content">
+            {% for contract in contracts %}
+                {% with review=reviews_by_contract|get_item:contract.id %}
+                    {% if review %}
+                    <div class="project-card">
+                        <strong>Project:</strong> {{ contract.project.title }} <br>
+                        <strong>Reviewer:</strong> {{ review.reviewer.username }} <br>
+                        <strong>Rating:</strong> {{ review.rating }} ⭐ <br>
+                        <strong>Comment:</strong> {{ review.comment }}
+                    </div>
+                    {% endif %}
+                {% endwith %}
+            {% empty %}
+                <p>No reviews yet.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
 
 <script>
-function toggleReviewForm(contractId){
-    const container = document.getElementById('reviewFormContainer-' + contractId);
-    if(container.style.display === 'none'){
-        container.style.display = 'block';
-        container.innerHTML = `
-            <form onsubmit="submitReview(event, ${contractId})">
-                <input type="number" name="rating" min="1" max="5" placeholder="Rating 1-5" required>
-                <textarea name="comment" placeholder="Comment" required></textarea>
-                <button type="submit">Submit Review</button>
-            </form>
-        `;
-    } else {
-        container.style.display = 'none';
-    }
+function toggleSection(activeId){
+    document.querySelectorAll('.section-content').forEach(section=>{
+        section.style.display = section.id === activeId ? 'block' : 'none';
+    });
 }
 
 function submitReview(e, contractId){
@@ -244,7 +528,12 @@ function markRead(notifId) {
     })
     .catch(err => console.error(err));
 }
-
+function markRead(id){
+    fetch(`/notification/read/${id}/`,{
+        method:"POST",
+        headers:{ "X-CSRFToken":"{{ csrf_token }}" }
+    }).then(()=>document.getElementById("notifCard"+id)?.remove());
+}
 function deleteAllNotifications() {
     if(!confirm("Delete all notifications?")) return;
 
@@ -268,6 +557,6 @@ function deleteAllNotifications() {
 
 </script>
 
-
 </body>
 </html>
+

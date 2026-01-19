@@ -77,6 +77,14 @@ urlpatterns = [
 
     path('project/<int:pk>/', views.project_detail, name='project_detail'),
     path('contract/<int:contract_id>/submit_review/', views.submit_review, name='submit_review'),
+    path("profile/", views.profile_view, name="profile_view"),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path(
+    'contract/<int:contract_id>/pdf/',
+    views.contract_letter_pdf,
+    name='contract_letter_pdf'
+),
+    path('contract/<int:contract_id>/letter/', views.contract_letter, name='contract_letter'),
 
 
     # ---------------- DRF API ----------------

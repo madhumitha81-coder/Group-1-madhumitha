@@ -1,5 +1,5 @@
 {% load static %}
-
+{% load custom_filters %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,15 +7,17 @@
 <meta charset="UTF-8">
 <title>Client Dashboard</title>
 <style>
+/* ===== GENERAL ===== */
 body {
     margin: 0;
     font-family: "Segoe UI", sans-serif;
     background: linear-gradient(135deg, #0f1117, #1e293b);
     color: #e5e7eb;
 }
+a { text-decoration: none; }
 .layout { display: flex; }
 
-/* SIDEBAR */
+/* ===== SIDEBAR ===== */
 .sidebar {
     width: 260px;
     min-height: 100vh;
@@ -28,7 +30,6 @@ body {
     padding: 14px 18px;
     margin-bottom: 12px;
     border-radius: 14px;
-    text-decoration: none;
     color: #e5e7eb;
     font-weight: 600;
     cursor: pointer;
@@ -37,106 +38,118 @@ body {
 .create-btn { background: #22c55e; color: #022c22 !important; }
 .logout-btn { background: #ff2d55; color: #020617 !important; margin-top: 30px; }
 
-/* CONTENT */
+/* ===== CONTENT ===== */
 .content { flex: 1; padding: 30px 40px; }
 
-/* PROFILE */
-.profile {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-}
-.profile-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #020617;
-    padding: 10px 18px;
-    border-radius: 18px;
-}
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #22c55e;
-    color: #022c22;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
+/* ===== PROFILE ===== */
+.profile { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+.profile-box { display: flex; align-items: center; gap: 12px; background: #020617; padding: 10px 18px; border-radius: 18px; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: #22c55e; color: #022c22; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-/* CARD */
-.card {
-    background: #0f172a;
-    padding: 22px;
-    border-radius: 18px;
-    margin-bottom: 20px;
-}
+/* ===== CARDS ===== */
+.card { background: #0f172a; padding: 22px; border-radius: 18px; margin-bottom: 20px; }
 .label { font-size: 13px; color: #94a3b8; }
 .value { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
 .desc { color: #c7d2fe; margin-bottom: 10px; }
+.skills span { background: #4338ca; padding: 6px 12px; border-radius: 20px; font-size: 12px; margin-right: 6px; }
 
-.skills span {
-    background: #4338ca;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    margin-right: 6px;
-}
-
-/* ACTIONS */
+/* ===== ACTIONS ===== */
 .actions { display: flex; gap: 10px; margin-top: 14px; }
-.actions a, .actions button {
-    padding: 8px 18px;
-    border-radius: 14px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-}
+.actions a, .actions button { padding: 8px 18px; border-radius: 14px; font-weight: 700; border: none; cursor: pointer; text-decoration: none; }
 .view { background: #22c55e; color: #022c22; }
 .edit { background: #facc15; color: #3b2f0b; }
 .delete { background: #ef4444; color: #020617; }
 .accept { background: #22c55e; }
 .reject { background: #ef4444; }
 
-/* TABLE */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-th, td {
-    padding: 14px;
-    border-bottom: 1px solid #334155;
-}
+/* ===== TABLE ===== */
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { padding: 14px; border-bottom: 1px solid #334155; }
 
-/* REVIEW */
-.review-box textarea, .review-box input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background: #1e293b;
-    color: #fff;
-    border: 1px solid #334155;
-}
-.stats { display: flex; gap: 30px; margin-top: 10px; margin-bottom: 20px; }
-.stat { background: #020617; padding: 12px 18px; border-radius: 14px; font-weight: bold; }
-
-/* NOTIFICATION */
-.notification-card {
-    background: #020617;
-    padding: 12px 18px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    display: flex;
+/* ===== DASHBOARD WELCOME ===== */
+.welcome-card {
+    background:#1e293b;
+    color:#fff;
+    display:flex;
     justify-content: space-between;
-    align-items: center;
+    align-items:center;
+    padding:24px 30px;
+    border-radius:16px;
+    margin-bottom:30px;
 }
+.welcome-card h2 { font-size:24px; margin:0; }
+.welcome-card p { margin-top:6px; color:#cbd5e1; }
+.welcome-icon { font-size:48px; }
+
+/* ===== DASHBOARD STATS CARDS ===== */
+.dashboard-stats {
+    display:flex;
+    gap:24px;
+    flex-wrap: wrap;
+}
+.stat-card {
+    flex:1;
+    min-width:220px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    padding:24px 28px;
+    border-radius:18px;
+    color:#fff;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+.stat-icon {
+    font-size:36px;
+    background: rgba(255,255,255,0.2);
+    border-radius:12px;
+    width:60px;
+    height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.stat-content h3 { margin:0; font-size:16px; font-weight:600; }
+.stat-content p { font-size:32px; font-weight:800; margin-top:6px; }
+.blue { background: linear-gradient(135deg,#2563eb,#1e40af); }
+.purple { background: linear-gradient(135deg,#7c3aed,#5b21b6); }
+.green { background: linear-gradient(135deg,#16a34a,#065f46); }
+
+/* ===== NOTIFICATIONS ===== */
+.notification-card { background: #020617; padding: 12px 18px; border-radius: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 .notification-card.unread { border-left: 4px solid #22c55e; }
 .btn.green { background: #22c55e; color: #022c22; padding: 6px 12px; border-radius: 12px; text-decoration: none; font-weight: bold; }
+.alert {
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    border-radius: 14px;
+    font-weight: 700;
+}
+
+.alert.success {
+    background: #22c55e;
+    color: #022c22;
+}
+
+.alert.error {
+    background: #ef4444;
+    color: #020617;
+}
+
+.alert.info {
+    background: #38bdf8;
+    color: #020617;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width: 900px){
+    .dashboard-stats { flex-direction: column; gap: 16px; }
+    .welcome-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
 </style>
 </head>
 <body>
@@ -150,88 +163,104 @@ th, td {
     <a onclick="showSection('proposals')">Proposals</a>
     <a onclick="showSection('contracts')">Contracts</a>
     <a onclick="showSection('notifications')">
-    Notifications
-    {% if unread_count > 0 %}
-        ({{ unread_count }})
-    {% endif %}
-</a>
-
+        Notifications {% if unread_count > 0 %}({{ unread_count }}){% endif %}
+    </a>
     <a href="{% url 'create_project' %}" class="create-btn">+ Create Project</a>
     <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
 </div>
 
 <!-- CONTENT -->
 <div class="content">
+<!-- DJANGO MESSAGES -->
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert {{ message.tags }}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
 
 <!-- PROFILE -->
-<div class="profile">
-    <div class="profile-box">
-        <div class="avatar">{{ request.user.username|first|upper }}</div>
+<div class="profile" >
+    <a href="{% url 'edit_profile' %}" class="notif-btn" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff;">
+
+        <!-- Avatar -->
+        {% if request.user.profile.avatar %}
+            <img src="{{ request.user.profile.avatar.url }}" alt="Avatar" class="avatar-img" style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
+        {% else %}
+            <div class="avatar" style="width:50px; height:50px; border-radius:50%; background:#334155; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                {{ request.user.username|first|upper }}
+            </div>
+        {% endif %}
+
+        <!-- Name & Role -->
+        <div class="profile-info" style="line-height:1.2;">
+            <strong>{{ request.user.profile.name|default:request.user.username }}</strong><br>
+            <small style="color:#94a3b8;">{{ request.user.profile.role|capfirst }}</small>
+        </div>
+
+    </a>
+</div>
+
+<!-- DASHBOARD SECTION -->
+<div id="dashboardSection" class="section-content">
+    <div class="welcome-card">
         <div>
-            <strong>{{ request.user.username }}</strong><br>
-            <small>Client</small>
+            <h2>Welcome back, {{ request.user.username }}!</h2>
+            <p>You have {{ contracts|length }} active contracts.</p>
+        </div>
+        <div class="welcome-icon">🚀</div>
+    </div>
+
+    <div class="dashboard-stats">
+        <div class="stat-card blue">
+            <div class="stat-icon">📁</div>
+            <div class="stat-content">
+                <h3>Active Projects</h3>
+                <p>{{ active_projects }}</p>
+            </div>
+        </div>
+        <div class="stat-card purple">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+                <h3>Total Proposals</h3>
+                <p>{{ total_proposals }}</p>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboardSection">
-    <h1>Welcome, {{ request.user.username }} 🚀</h1>
-    <div class="stats">
-        <div class="stat">Projects: <b>{{ projects|length }}</b></div>
-        <div class="stat">
-            Proposals: <b>
-            {% with total=0 %}
-            {% for project in projects %}
-                {% with total=total|add:project.proposals.count %}
-                {% endwith %}
+<!-- PROJECTS SECTION -->
+<div id="projectsSection" class="section-content"style="display:none;">
+    {% for project in projects %}
+    <div class="card">
+        <div class="value">{{ project.title }}</div>
+        <div class="desc">{{ project.description }}</div>
+        <div>Budget: ₹{{ project.budget }}</div>
+        <div class="skills">
+            {% for skill in project.skills_required.all %}
+            <span>{{ skill.name }}</span>
             {% endfor %}
-            {{ total }}
-            {% endwith %}
-            </b>
         </div>
-        <div class="stat">
-            Budget: ₹ <b>
-            {% with total_budget=0 %}
-            {% for project in projects %}
-                {% with total_budget=total_budget|add:project.budget %}
-                {% endwith %}
-            {% endfor %}
-            {{ total_budget }}
-            {% endwith %}
-            </b>
+        <div class="actions">
+            <a href="{% url 'project_detail' project_id=project.id %}" class="view">View</a>
+            <a href="{% url 'update_project' pk=project.id %}" class="edit">Edit</a>
+            <form method="POST" action="{% url 'delete_project' pk=project.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="delete">Delete</button>
+            </form>
         </div>
     </div>
+    {% empty %}
+    <p>No projects yet.</p>
+    {% endfor %}
 </div>
 
-<!-- PROJECTS -->
-<div id="projectsSection" style="display:none;">
-{% for project in projects %}
-<div class="card">
-    <div class="value">{{ project.title }}</div>
-    <div class="desc">{{ project.description }}</div>
-    <div>Budget: ₹{{ project.budget }}</div>
-    <div class="skills">
-        {% for skill in project.skills_required.all %}
-        <span>{{ skill.name }}</span>
-        {% endfor %}
-    </div>
-    <div class="actions">
-        <a href="{% url 'project_detail' project_id=project.id %}" class="view">View</a>
-        <a href="{% url 'update_project' pk=project.id %}" class="edit">Edit</a>
-        <form method="POST" action="{% url 'delete_project' pk=project.id %}" style="display:inline;">
-            {% csrf_token %}
-            <button class="delete">Delete</button>
-        </form>
-    </div>
-</div>
-{% empty %}
-<p>No projects yet.</p>
-{% endfor %}
-</div>
+<!-- PROPOSALS SECTION -->
+{% load static %}
+{% load custom_filters %}
 
-<!-- PROPOSALS -->
-<div id="proposalsSection" style="display:none; padding:20px; background:#0f1117; border-radius:12px; color:#e5e7eb;">
+<div id="proposalsSection" class="section-content" style="display:none;">
     <h2 style="margin-bottom:15px; color:#facc15;">Proposals</h2>
 
     {% for project in projects %}
@@ -239,8 +268,8 @@ th, td {
 
         <div style="display:flex; flex-wrap:wrap; gap:15px; margin-top:10px;">
             {% for proposal in project.proposals.all %}
-
             
+            <!-- Proposal Card -->
             <div style="
                 border:1px solid #27272a;
                 border-radius:12px;
@@ -256,6 +285,12 @@ th, td {
                 <p><strong>Freelancer:</strong> {{ proposal.freelancer.user.username }}</p>
                 <p><strong>Bid:</strong> ₹{{ proposal.bid_amount|floatformat:2 }}</p>
 
+                <!-- View Freelancer Profile Button -->
+                <button onclick="document.getElementById('freelancerProfile{{ proposal.id }}').style.display='block';" 
+                        style="margin-top:5px; padding:5px 10px; border-radius:6px; background:#38bdf8; color:#020617; cursor:pointer;">
+                    View Profile
+                </button>
+
                 <p><strong>Status:</strong>
                     {% if proposal.status|upper == "ACCEPTED" %}
                         <span style="color:#22c55e; font-weight:bold;">ACCEPTED</span>
@@ -270,18 +305,14 @@ th, td {
                 <div style="margin-top:10px; display:flex; gap:10px;">
                     <form method="POST" action="{% url 'accept_proposal' proposal.id %}">
                         {% csrf_token %}
-                        <button type="submit" style="
-                            background:#22c55e; color:#000; border:none;
-                            padding:6px 12px; border-radius:8px; cursor:pointer;">
+                        <button type="submit" style="background:#22c55e; color:#000; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">
                             Accept
                         </button>
                     </form>
 
                     <form method="POST" action="{% url 'reject_proposal' proposal.id %}">
                         {% csrf_token %}
-                        <button type="submit" style="
-                            background:#ef4444; color:#fff; border:none;
-                            padding:6px 12px; border-radius:8px; cursor:pointer;">
+                        <button type="submit" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">
                             Reject
                         </button>
                     </form>
@@ -289,30 +320,86 @@ th, td {
                 {% endif %}
 
                 {% if proposal.contract %}
-                    <a href="{% url 'contract_chat' proposal.contract.id %}" style="
-                        display:inline-block; margin-top:10px;
-                        padding:6px 12px; border-radius:8px;
-                        background:#38bdf8; color:#020617;
-                        font-weight:bold; text-decoration:none;">
+                    <a href="{% url 'contract_chat' proposal.contract.id %}" style="display:inline-block; margin-top:10px; padding:6px 12px; border-radius:8px; background:#38bdf8; color:#020617; font-weight:bold; text-decoration:none;">
                         Go to Contract Chat
                     </a>
                 {% endif %}
 
             </div>
 
+            <!-- Freelancer Profile Modal -->
+            <div id="freelancerProfile{{ proposal.id }}" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); 
+                 background:#1f2937; padding:20px; border-radius:12px; border:2px solid #38bdf8; z-index:1000; width:320px;">
+                <h3 style="color:#facc15; margin-bottom:10px;">Freelancer Profile</h3>
+                <p><strong>Name:</strong> {{ proposal.freelancer.name }}</p>
+                <p><strong>Username:</strong> {{ proposal.freelancer.user.username }}</p>
+                <p><strong>Email:</strong> {{ proposal.freelancer.user.email }}</p>
+                <p><strong>Bio:</strong> {{ proposal.freelancer.bio|default:"No bio provided" }}</p>
+                <p><strong>Skills:</strong>
+                {% for skill in proposal.freelancer.skills.all %}
+                {{ skill.name }}
+                {% if not forloop.last %},
+                 {% endif %}
+                 {% endfor %}</p>
+                {% if proposal.freelancer.avatar %}
+                    <img src="{{ proposal.freelancer.avatar.url }}" width="80" height="80" style="border-radius:50%; margin-top:10px; border:2px solid #38bdf8;">
+                {% endif %}
+
+                <!-- Reviews -->
+                <h4 style="color:#38bdf8; margin-top:12px;">Reviews</h4>
+                {% with has_reviews=False %}
+                    {% for contract in contracts %}
+                        {% if contract.freelancer == proposal.freelancer %}
+                            {% with review=contract_reviews|get_item:contract.id %}
+                                {% if review %}
+                                    {% with has_reviews=True %}
+                                        <p><strong>Project:</strong> {{ contract.project.title }}</p>
+                                        <p><strong>Client:</strong> {{ contract.client.user.username }}</p>
+                                        <p><strong>Rating:</strong> {{ review.rating }}/5</p>
+                                        <p><strong>Comment:</strong> {{ review.comment }}</p>
+                                        <hr style="border-color:#27272a;">
+                                    {% endwith %}
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if not has_reviews %}
+                        <p style="color:#94a3b8;">No reviews yet for this freelancer.</p>
+                    {% endif %}
+                {% endwith %}
+
+                <button onclick="document.getElementById('freelancerProfile{{ proposal.id }}').style.display='none';" 
+                        style="margin-top:12px; padding:6px 12px; border-radius:6px; background:#ef4444; color:#fff; cursor:pointer;">
+                    Close
+                </button>
+            </div>
+
             {% empty %}
                 <p style="color:#94a3b8;">No proposals for this project.</p>
             {% endfor %}
         </div>
-
     {% empty %}
         <p style="color:#94a3b8;">No projects yet.</p>
     {% endfor %}
 </div>
+
+
+<!-- CONTRACTS SECTION -->
+<!-- PROPOSALS -->
+
+
 {% load static %}
 {% load custom_filters %}
 
-<div id="contractsSection" style="display:block; padding:20px; background:#0f1117; border-radius:12px; color:#e5e7eb;">
+<div id="contractsSection" class="section-content"
+     style="
+        display:block;
+        padding:20px;
+        background:#0f1117;
+        border-radius:12px;
+        color:#e5e7eb;
+     ">
+
     <h2 style="margin-bottom:15px; color:#22c55e;">Contracts</h2>
 
     <table style="width:100%; border-collapse:collapse;">
@@ -320,7 +407,7 @@ th, td {
             <th style="padding:12px;">Project</th>
             <th style="padding:12px;">Freelancer</th>
             <th style="padding:12px;">Status</th>
-            <th style="padding:12px;">Actions / Review</th>
+            <th style="padding:12px;">Actions / Contract</th>
             <th style="padding:12px;">Chat</th>
         </tr>
 
@@ -329,11 +416,20 @@ th, td {
             {% if contract.status == 'ACTIVE' %}background:#052e16;
             {% elif contract.status == 'COMPLETED' %}background:#1e293b;
             {% elif contract.status == 'CANCELLED' %}background:#450a0a;
-            {% endif %}">
-            
-            <td style="padding:12px;">{{ contract.project.title }}</td>
-            <td style="padding:12px;">{{ contract.freelancer.user.username }}</td>
+            {% endif %}
+        ">
 
+            <!-- Project -->
+            <td style="padding:12px;">
+                {{ contract.project.title }}
+            </td>
+
+            <!-- Freelancer -->
+            <td style="padding:12px;">
+                {{ contract.freelancer.user.username }}
+            </td>
+
+            <!-- Status -->
             <td style="padding:12px; font-weight:bold;">
                 {% if contract.status == 'ACTIVE' %}
                     <span style="color:#22c55e;">ACTIVE</span>
@@ -344,45 +440,90 @@ th, td {
                 {% endif %}
             </td>
 
+            <!-- Actions + Contract Letter -->
             <td style="padding:12px;">
+
+                <!-- CONTRACT LETTER -->
+                <a href="{% url 'contract_letter' contract.id %}"
+                   class="green"
+                   target="_blank">
+                    View Contract
+                </a>
+
+                
+
+                <br><br>
+
                 {% if contract.status == 'ACTIVE' %}
-                    <form method="POST" action="{% url 'complete_contract' contract.id %}" style="display:inline;">
+                    <form method="POST"
+                          action="{% url 'complete_contract' contract.id %}"
+                          style="display:inline;">
                         {% csrf_token %}
-                        <button class="green" type="submit">Mark Completed</button>
+                        <button class="green" type="submit">
+                            Mark Completed
+                        </button>
                     </form>
 
-                    <form method="POST" action="{% url 'cancel_contract' contract.id %}" style="display:inline;">
+                    <form method="POST"
+                          action="{% url 'cancel_contract' contract.id %}"
+                          style="display:inline;">
                         {% csrf_token %}
-                        <button class="red" type="submit">Cancel</button>
+                        <button class="red" type="submit">
+                            Cancel
+                        </button>
                     </form>
 
                 {% elif contract.status == 'COMPLETED' %}
                     {% if contract_reviews|get_item:contract.id %}
-                        <span style="color:#22c55e; font-weight:bold;">Reviewed</span>
+                        <span style="color:#22c55e; font-weight:bold;">
+                            Reviewed
+                        </span>
                     {% else %}
-                        <button class="green" onclick="toggleReviewForm({{ contract.id }})">Write Review</button>
+                        <button class="green"
+                                onclick="toggleReviewForm({{ contract.id }})">
+                            Write Review
+                        </button>
 
-                        <form id="reviewForm{{ contract.id }}" method="POST" action="{% url 'submit_review' contract.id %}" style="display:none; margin-top:10px;">
+                        <form id="reviewForm{{ contract.id }}"
+                              method="POST"
+                              action="{% url 'submit_review' contract.id %}"
+                              style="display:none; margin-top:10px;">
                             {% csrf_token %}
-                            <input type="number" name="rating" min="1" max="5" placeholder="Rating" required>
-                            <textarea name="comment" placeholder="Write your review" required></textarea>
-                            <button type="submit" class="green">Submit Review</button>
+                            <input type="number"
+                                   name="rating"
+                                   min="1"
+                                   max="5"
+                                   placeholder="Rating"
+                                   required>
+                            <textarea name="comment"
+                                      placeholder="Write your review"
+                                      required></textarea>
+                            <button type="submit" class="green">
+                                Submit Review
+                            </button>
                         </form>
                     {% endif %}
 
                 {% elif contract.status == 'CANCELLED' %}
-                    <span style="color:#ef4444;">Cancelled</span>
+                    <span style="color:#ef4444;">
+                        Cancelled
+                    </span>
                 {% endif %}
             </td>
 
+            <!-- Chat -->
             <td style="padding:12px;">
-                <a href="{% url 'contract_chat' contract.id %}" class="green">Chat</a>
+                <a href="{% url 'contract_chat' contract.id %}"
+                   class="green">
+                    Chat
+                </a>
             </td>
         </tr>
 
         {% empty %}
         <tr>
-            <td colspan="5" style="padding:20px; text-align:center; color:#94a3b8;">
+            <td colspan="5"
+                style="padding:20px; text-align:center; color:#94a3b8;">
                 No contracts yet.
             </td>
         </tr>
@@ -390,12 +531,12 @@ th, td {
     </table>
 </div>
 
-
+<!-- NOTIFICATIONS SECTION -->
 <!-- Notifications Section -->
 <!-- CSRF token -->
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
-<div id="notificationsSection">
+<div id="notificationsSection" class="section-content">
     <h3>Notifications</h3>
 
     {% if notifications %}
@@ -417,50 +558,8 @@ th, td {
         <p>No notifications yet.</p>
     {% endif %}
 </div>
-
-
+<!-- JS -->
 <script>
-function markRead(notifId) {
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    fetch(`/notification/read/${notifId}/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": csrftoken }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success === true) {
-            const card = document.getElementById("notifCard" + notifId);
-            if (card) card.remove();
-        } else {
-            alert("Failed to mark as read: " + (data.error || "Unknown"));
-        }
-    })
-    .catch(err => console.error(err));
-}
-
-function deleteAllNotifications() {
-    if(!confirm("Delete all notifications?")) return;
-
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    fetch(`/notifications/clear_all/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": csrftoken }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success === true) {
-            // Remove all cards from DOM
-            document.querySelectorAll(".notification-card").forEach(el => el.remove());
-        } else {
-            alert("Failed to delete all notifications");
-        }
-    })
-    .catch(err => console.error(err));
-}
-
-
 function showSection(section) {
     const sections = ['dashboard','projects','proposals','contracts','notifications'];
     sections.forEach(s => {
@@ -473,43 +572,36 @@ function showSection(section) {
 
 function toggleReviewForm(contractId) {
     var form = document.getElementById("reviewForm" + contractId);
-    if(form.style.display === "none") {
-        form.style.display = "block";
-    } else {
-        form.style.display = "none";
-    }
+    if(form.style.display === "none") form.style.display = "block";
+    else form.style.display = "none";
 }
-function submitReview(e, contractId) {
-    e.preventDefault(); // prevent normal submit
-    const form = e.target;
-    const rating = form.rating.value;
-    const comment = form.comment.value;
 
-    fetch(form.action, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ rating, comment })
-    })
+function markRead(id){
+    fetch(`/notification/read/${id}/`,{ method:"POST", headers:{ "X-CSRFToken":"{{ csrf_token }}" }})
+    .then(()=>document.getElementById("notifCard"+id)?.remove());
+}
+function deleteAllNotifications() {
+    if(!confirm("Delete all notifications?")) return;
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    fetch(`/notifications/clear_all/`, { method: "POST", headers: { "X-CSRFToken": csrftoken } })
     .then(res => res.json())
     .then(data => {
-        if (data.success) {
-            // Hide review form
-            document.getElementById('reviewFormRow' + contractId).style.display = 'none';
-            // Update button / span to "Reviewed"
-            document.getElementById('reviewStatus' + contractId).innerHTML = "Reviewed";
-        } else {
-            alert(data.error || 'Error submitting review.');
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert('Server error. Please try again.');
-    });
+        if(data.success === true){
+            document.querySelectorAll(".notification-card").forEach(el => el.remove());
+        } else { alert("Failed to delete all notifications"); }
+    }).catch(err => console.error(err));
 }
 </script>
+
 </div>
 </body>
 </html>
+
+
+
+
+
+<!-- PROPOSALS -->
+
+
+

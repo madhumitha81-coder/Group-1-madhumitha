@@ -84,51 +84,50 @@ def root_redirect(request):
 # ===========================
 # CLIENT DASHBOARD
 # ===========================
-
-from django.shortcuts import render
+from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
-from .models import Project, Proposal, Contract, Notification, Review
 from .decorators import client_required
 
-@login_required
-@client_required
+from django.db.models import Sum
+
 def client_dashboard(request):
     user = request.user
-    profile = user.profile  # Profile instance
+    profile = user.profile
 
-    # All projects created by this client
+    # Projects created by client
     projects = Project.objects.filter(client=user)
 
-    # All proposals submitted to this client's projects
+    # Proposals for client's projects
     proposals = Proposal.objects.filter(project__client=user)
 
-    # All contracts where client is this profile
-    contracts = Contract.objects.filter(client=profile).select_related('project', 'freelancer')
+    # Contracts for this client
+    contracts = Contract.objects.filter(client=profile).select_related(
+        "project", "freelancer"
+    )
 
     # Notifications
     notifications = Notification.objects.filter(user=user).order_by("-created_at")
     unread_count = notifications.filter(is_read=False).count()
 
-    # Prepare dict of reviews for each contract
+    # Reviews for each contract
     contract_reviews = {}
     for contract in contracts:
-        # Filter reviews for this contract by this client
         review = Review.objects.filter(
             project=contract.project,
-            reviewer_name=user.username  # Client's username as reviewer
+            reviewer_name=user.username
         ).first()
-        contract_reviews[contract.id] = review  # None if not reviewed
+        contract_reviews[contract.id] = review
 
     context = {
         "projects": projects,
-        "proposals": proposals,
         "contracts": contracts,
+        "contract_reviews": contract_reviews,
         "notifications": notifications,
         "unread_count": unread_count,
-        "contract_reviews": contract_reviews,
     }
 
     return render(request, "client_dashboard.html", context)
+
 
 # ===========================
 # FREELANCER DASHBOARD
@@ -136,43 +135,54 @@ def client_dashboard(request):
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import Project, Contract, Review, Notification
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Project, Proposal, Contract, Review, Notification
 
 @login_required
 def freelancer_dashboard(request):
     user = request.user
     profile = user.profile  # freelancer profile
 
-    # Contracts for this freelancer
-    contracts = Contract.objects.filter(freelancer=profile).select_related('project', 'client')
+    # ✅ Projects: show all projects posted by clients
+    projects = Project.objects.all().order_by('-created_at')
 
-    # Prepare reviews dict
-    reviews_by_contract = {}
-    for contract in contracts:
-        review = Review.objects.filter(
-            project=contract.project,
-            reviewer_name=contract.client.user.username
+    # ✅ Proposals submitted by this freelancer
+    proposals = Proposal.objects.filter(freelancer=profile).select_related(
+        'project',
+        'project__client'
+    )
+
+    # ✅ Contracts where this freelancer is involved
+    contracts = Contract.objects.filter(freelancer=profile).select_related(
+        'project',
+        'client',
+        'client__user'
+    )
+
+    # Map reviews to contracts
+    reviews_by_contract = {
+        c.id: Review.objects.filter(
+            project=c.project,
+            reviewer_name=c.client.user.username
         ).first()
-        reviews_by_contract[contract.id] = review
+        for c in contracts
+    }
 
-    # Fetch all projects
-    projects = Project.objects.all()
-
-    # Fetch notifications for this freelancer
+    # Notifications
     notifications = Notification.objects.filter(user=user).order_by('-created_at')
-
-    # Calculate unread notifications count
     unread_count = notifications.filter(is_read=False).count()
 
     context = {
+        "projects": projects,
+        "proposals": proposals,
         "contracts": contracts,
         "reviews_by_contract": reviews_by_contract,
-        "projects": projects,
         "notifications": notifications,
-        "unread_count": unread_count,  # <--- Add this
+        "unread_count": unread_count,
     }
 
     return render(request, "freelancer_dashboard.html", context)
-
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -299,12 +309,20 @@ def accept_proposal(request, proposal_id):
         messages.error(request, "Unauthorized.")
         return redirect('client_dashboard')
 
-    if request.method == 'POST':
-        if proposal.status != 'accepted':
-            proposal.status = 'accepted'
-            proposal.save()
-            Proposal.objects.filter(project=project).exclude(id=proposal.id).update(status='rejected')
+    if proposal.status == 'ACCEPTED':
+        messages.error(request, "Proposal already accepted.")
+        return redirect('client_dashboard')
 
+    if request.method == 'POST':
+        proposal.status = 'ACCEPTED'
+        proposal.save()
+
+        # Reject all other proposals
+        Proposal.objects.filter(
+            project=project
+        ).exclude(id=proposal.id).update(status='REJECTED')
+
+        # Create contract safely
         Contract.objects.get_or_create(
             proposal=proposal,
             defaults={
@@ -315,28 +333,41 @@ def accept_proposal(request, proposal_id):
             }
         )
 
-        messages.success(request, f"Proposal ACCEPTED. Contract CREATED/EXISTS.")
+        # 🔔 Notify freelancer
+        Notification.objects.create(
+            user=proposal.freelancer.user,
+            message=f"Your proposal for '{project.title}' was ACCEPTED."
+        )
+
+        messages.success(request, "Proposal accepted and contract created.")
 
     return redirect('client_dashboard')
-
-
 @login_required
 def reject_proposal(request, proposal_id):
     proposal = get_object_or_404(Proposal, id=proposal_id)
     project = proposal.project
+
     if project.client != request.user:
         messages.error(request, "Unauthorized.")
         return redirect('client_dashboard')
 
+    if proposal.status == 'ACCEPTED':
+        messages.error(request, "Accepted proposal cannot be rejected.")
+        return redirect('client_dashboard')
+
     if request.method == 'POST':
-        proposal.status = 'rejected'
+        proposal.status = 'REJECTED'
         proposal.save()
+
         Notification.objects.create(
             user=proposal.freelancer.user,
-            message=f"Your proposal for '{project.title}' has been rejected."
+            message=f"Your proposal for '{project.title}' was rejected."
         )
+
         messages.info(request, "Proposal rejected.")
+
     return redirect('client_dashboard')
+
 
 
 # ===========================
@@ -614,3 +645,203 @@ def submit_review(request, contract_id):
 
     context = {"contract": contract}
     return render(request, "submit_review.html", context)
+from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Project, Contract, Proposal, Review, Notification
+
+@login_required
+def profile_view(request):
+    user = request.user
+    profile = user.profile  # Always use Profile when required
+
+    # ==========================
+    # CLIENT DATA
+    # ==========================
+    client_projects = Project.objects.filter(client=user)
+    client_proposals = Proposal.objects.filter(project__client=user)
+    client_contracts = Contract.objects.filter(client=profile).select_related(
+        "project", "freelancer", "proposal"
+    )
+
+    client_contract_reviews = {}
+    for contract in client_contracts:
+        review = Review.objects.filter(
+            project=contract.project,
+            reviewer_name=user.username
+        ).first()
+        client_contract_reviews[contract.id] = review
+
+    client_active_projects = client_projects.count()
+    client_total_proposals = client_proposals.count()
+    client_total_revenue = client_contracts.filter(
+        status="completed"
+    ).aggregate(revenue=Sum("proposal__bid_amount"))["revenue"] or 0
+
+    # ==========================
+    # FREELANCER DATA
+    # ==========================
+    freelancer_contracts = Contract.objects.filter(freelancer=profile).select_related(
+        "project", "client"
+    )
+
+    freelancer_reviews = {}
+    for contract in freelancer_contracts:
+        review = Review.objects.filter(
+            project=contract.project,
+            reviewer_name=contract.client.user.username
+        ).first()
+        freelancer_reviews[contract.id] = review
+
+    freelancer_projects = Project.objects.all()  # Or filter projects relevant to freelancer if needed
+
+    # ==========================
+    # NOTIFICATIONS
+    # ==========================
+    notifications = Notification.objects.filter(user=user).order_by("-created_at")
+    unread_count = notifications.filter(is_read=False).count()
+
+    # ==========================
+    # CONTEXT
+    # ==========================
+    context = {
+        "user": user,
+        "profile": profile,
+
+        # Client data
+        "client_projects": client_projects,
+        "client_proposals": client_proposals,
+        "client_contracts": client_contracts,
+        "client_contract_reviews": client_contract_reviews,
+        "client_active_projects": client_active_projects,
+        "client_total_proposals": client_total_proposals,
+        "client_total_revenue": client_total_revenue,
+
+        # Freelancer data
+        "freelancer_contracts": freelancer_contracts,
+        "freelancer_reviews": freelancer_reviews,
+        "freelancer_projects": freelancer_projects,
+
+        # Notifications
+        "notifications": notifications,
+        "unread_count": unread_count,
+    }
+
+    return render(request, "profile.html", context)
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import ProfileForm
+from .models import Review
+
+@login_required
+def edit_profile(request):
+    profile = request.user.profile
+    user = request.user
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+
+            # 🔥 Update User email (NOT Profile)
+            email = request.POST.get("email")
+            if email and email != user.email:
+                user.email = email
+                user.save()
+
+            messages.success(request, "Profile updated successfully!")
+            return redirect("edit_profile")
+
+    else:
+        form = ProfileForm(instance=profile)
+
+    # Reviews only for freelancer
+    reviews = None
+    if profile.role == "freelancer":
+        reviews = Review.objects.filter(project__contract__freelancer=profile)
+
+    return render(request, "edit_profile.html", {
+        "profile": profile,
+        "form": form,
+        "reviews": reviews,
+    })
+from django.shortcuts import render, get_object_or_404
+from .models import Contract
+
+def contract_letter(request, contract_id):
+    contract = get_object_or_404(Contract, id=contract_id)
+    return render(request, 'cover_letter.html', {
+        'contract': contract
+    })
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from .models import Contract
+
+
+def contract_letter_pdf(request, contract_id):
+    contract = get_object_or_404(Contract, id=contract_id)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = (
+        f'attachment; filename="Contract_{contract.id}.pdf"'
+    )
+
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+
+    y = height - 50
+
+    p.setFont("Times-Bold", 18)
+    p.drawCentredString(width / 2, y, "CONTRACT AGREEMENT")
+    y -= 40
+
+    p.setFont("Times-Roman", 12)
+    p.drawString(50, y, f"Date: {contract.created_at.strftime('%d %B %Y')}")
+    y -= 30
+
+    text = p.beginText(50, y)
+    text.setLeading(20)
+
+    text.textLine(
+        f"This agreement is made between "
+        f"{contract.project.client.user.username} (Client) "
+        f"and {contract.freelancer.user.username} (Freelancer)."
+    )
+    text.textLine("")
+    text.textLine(
+        f"The Freelancer agrees to work on the project titled "
+        f"'{contract.project.title}'."
+    )
+    text.textLine("")
+    text.textLine(
+        f"Current contract status: {contract.status}."
+    )
+    text.textLine("")
+    text.textLine(
+        "All deliverables, timelines, and payments shall follow "
+        "the accepted proposal."
+    )
+
+    p.drawText(text)
+
+    y -= 160
+
+    p.drawString(50, y, "Client Signature:")
+    p.drawString(50, y - 20, contract.project.client.user.username)
+
+    p.drawString(width - 250, y, "Freelancer Signature:")
+    p.drawString(width - 250, y - 20, contract.freelancer.user.username)
+
+    p.showPage()
+    p.save()
+
+    return response
+from django.urls import reverse
+
+def test_dashboard_access(self):
+    response = self.client.get(reverse("freelancer_dashboard"))
+    self.assertEqual(response.status_code, 200)

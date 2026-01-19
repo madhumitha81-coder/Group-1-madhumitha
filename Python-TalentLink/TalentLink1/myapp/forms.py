@@ -55,6 +55,41 @@ class ProjectForm(forms.ModelForm):
         }
 
 
+from django import forms
+from .models import Profile, Skill
+
+class ProfileForm(forms.ModelForm):
+    skills_text = forms.CharField(
+        required=False,
+        help_text="Enter skills separated by commas."
+    )
+
+    class Meta:
+        model = Profile
+        fields = ['avatar', 'name', 'bio', 'portfolio', 'location', 'availability']
+        widgets = {
+            'bio': forms.Textarea(attrs={'rows':3}),
+            'portfolio': forms.Textarea(attrs={'rows':3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Pre-fill skills_text from existing skills
+        if self.instance.pk:
+            self.fields['skills_text'].initial = ', '.join([s.name for s in self.instance.skills.all()])
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        skills_str = self.cleaned_data.get('skills_text', '')
+        skills_names = [s.strip() for s in skills_str.split(',') if s.strip()]
+        if commit:
+            profile.save()
+            # Update skills
+            profile.skills.clear()
+            for skill_name in skills_names:
+                skill, _ = Skill.objects.get_or_create(name=skill_name)
+                profile.skills.add(skill)
+        return profile
 
 # -------------------------
 # REVIEW FORM

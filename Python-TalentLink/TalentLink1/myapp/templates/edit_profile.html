@@ -1,0 +1,178 @@
+{% load static %}
+{% load custom_filters %}
+
+<html>
+<head>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e5e7eb;
+            font-family: "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .section {
+            background-color: #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        h3 {
+            color: #facc15;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: 1px solid #27272a;
+            background-color: #0f172a;
+            color: #e5e7eb;
+        }
+
+        input:disabled, textarea:disabled, select:disabled {
+            background-color: #27272a;
+            color: #94a3b8;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-edit {
+            background-color: #38bdf8;
+            color: #020617;
+        }
+
+        .btn-edit:hover {
+            background-color: #0ea5e9;
+        }
+
+        .btn-save {
+            background-color: #22c55e;
+            color: #020617;
+        }
+
+        .btn-save:hover {
+            background-color: #16a34a;
+        }
+
+        img.profile-avatar {
+            border-radius: 50%;
+            margin-top: 10px;
+            border: 2px solid #38bdf8;
+        }
+
+        .review-card {
+            border: 1px solid #27272a;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            background-color: #111827;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .review-card p {
+            margin: 4px 0;
+        }
+
+        .current-skills {
+            color: #facc15;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="section">
+    <h3>Profile Details</h3>
+
+    <form method="POST" enctype="multipart/form-data" action="{% url 'edit_profile' %}">
+        {% csrf_token %}
+
+        <!-- Profile Picture -->
+        <label>Profile Picture</label>
+        {{ form.avatar|add_attr:"disabled" }}
+        {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" width="80" height="80" class="profile-avatar">
+        {% endif %}
+
+        <!-- Email -->
+        <label>Email</label>
+        <input type="email" name="email" value="{{ request.user.email }}" disabled>
+
+        <!-- Location -->
+        <label>Location</label>
+        {{ form.location|add_attr:"disabled" }}
+
+        <!-- Bio -->
+        <label>Bio</label>
+        {{ form.bio|add_attr:"disabled" }}
+
+        <!-- Skills -->
+        <label>Skills (comma separated)</label>
+        {{ form.skills_text|add_attr:"disabled" }}
+        
+
+        <!-- Availability -->
+        <label>Availability</label>
+        {{ form.availability|add_attr:"disabled" }}
+
+        <!-- Buttons -->
+        <div style="margin-top:16px;">
+            <button type="button" class="btn btn-edit" id="editBtn">Edit Profile</button>
+            <button type="submit" class="btn btn-save" id="saveBtn" style="display:none;">Save Profile</button>
+        </div>
+    </form>
+</div>
+
+{% if profile.role == 'freelancer' %}
+<div class="section">
+    <h3 style="color:#38bdf8;">Reviews</h3>
+
+    {% if reviews %}
+        {% for review in reviews %}
+            <div class="review-card">
+                <p><strong>Project:</strong> {{ review.project.title }}</p>
+                <p><strong>Client:</strong> {{ review.reviewer_name }}</p>
+                <p><strong>Rating:</strong> {{ review.rating }}/5</p>
+                <p><strong>Comment:</strong> {{ review.comment }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="color:#94a3b8;">No reviews yet.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+const editBtn = document.getElementById('editBtn');
+const saveBtn = document.getElementById('saveBtn');
+
+editBtn.addEventListener('click', () => {
+    const inputs = document.querySelectorAll('input, textarea, select');
+    inputs.forEach(i => i.removeAttribute('disabled'));
+    saveBtn.style.display = 'inline-block';
+    editBtn.style.display = 'none';
+});
+</script>
+
+</body>
+</html>

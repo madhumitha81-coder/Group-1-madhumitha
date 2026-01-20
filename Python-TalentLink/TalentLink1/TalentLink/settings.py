@@ -1,45 +1,51 @@
 import os
 from pathlib import Path
 import dj_database_url
-# settings.py
-import os
-
-FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 
 # =========================
 # BASE DIR
 # =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# =========================
+# FRONTEND ACCESS TOKEN
+# =========================
+FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 
 # =========================
 # SECURITY
 # =========================
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
-
-# DEBUG must be False in production (Render)
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS", "localhost,127.0.0.1,talentlink-backend.onrender.com"
+).split(",")
 
 # =========================
-# ALLOWED HOSTS
+# DATABASE CONFIG
 # =========================
-ALLOWED_HOSTS = [
-    "talentlink-backend.onrender.com",
-    "localhost",
-    "127.0.0.1",
-]
+# Local fallback database
+LOCAL_DATABASE = {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': 'demo',
+    'USER': 'postgres',
+    'PASSWORD': 'madhumitha@81',
+    'HOST': 'localhost',
+    'PORT': '5432',
+}
 
-
-# =========================
-# DATABASE
-# =========================
+# dj-database-url config (uses DATABASE_URL if set, else local)
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL")
+        default=f"postgres://{LOCAL_DATABASE['USER']}:{LOCAL_DATABASE['PASSWORD']}@{LOCAL_DATABASE['HOST']}:{LOCAL_DATABASE['PORT']}/{LOCAL_DATABASE['NAME']}",
+        conn_max_age=600,
     )
 }
 
+# SSL for production (Render)
+if not DEBUG:
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 # =========================
 # INSTALLED APPS
@@ -52,14 +58,15 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # Third-party apps
     "django_filters",
     "rest_framework",
     "corsheaders",
-
-    "myapp.apps.MyappConfig",
     "rest_framework.authtoken",
-]
 
+    # Your apps
+    "myapp.apps.MyappConfig",
+]
 
 # =========================
 # MIDDLEWARE
@@ -67,17 +74,15 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    'myapp.middleware.VerifyFrontendTokenMiddleware',
+    "myapp.middleware.VerifyFrontendTokenMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
 
 # =========================
 # URLS & TEMPLATES
@@ -87,7 +92,6 @@ ROOT_URLCONF = "TalentLink.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # IMPORTANT: matches your screenshots
         "DIRS": [BASE_DIR / "myapp" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -103,25 +107,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "TalentLink.wsgi.application"
 
-
 # =========================
 # STATIC & MEDIA FILES
 # =========================
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-
 
 # =========================
 # AUTH SETTINGS
 # =========================
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
-
 
 # =========================
 # DJANGO REST FRAMEWORK
@@ -141,12 +141,15 @@ REST_FRAMEWORK = {
     ],
 }
 
-
 # =========================
 # CORS
 # =========================
-CORS_ALLOW_ALL_ORIGINS = True
-
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = os.environ.get(
+        "CORS_ALLOWED_ORIGINS", "https://TalentLink-frontenddomain.com"
+    ).split(",")
 
 # =========================
 # HTTPS / SECURITY
@@ -166,12 +169,15 @@ else:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
-
 # =========================
 # TIMEZONE & LANGUAGE
 # =========================
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
-
 USE_I18N = True
 USE_TZ = True
+
+# =========================
+# DEBUG: Print current database (optional)
+# =========================
+print("Using database:", DATABASES['default'].get('NAME'))

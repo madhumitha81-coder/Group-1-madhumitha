@@ -19,7 +19,8 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 if DEBUG:
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 else:
-    ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com", ".onrender.com"]
+    # Replace with your Render URL and any custom domains
+    ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com", "TalentLink-frontenddomain.com"]
 
 # =========================
 # DATABASE CONFIG
@@ -40,6 +41,7 @@ DATABASES = {
     )
 }
 
+# Use SSL in production
 if not DEBUG:
     DATABASES["default"]["OPTIONS"] = {"sslmode": "require"}
 else:
@@ -48,7 +50,7 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-# Trust Render's proxy for SSL
+# Trust Render's proxy for HTTPS
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG:
@@ -76,9 +78,26 @@ FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = os.environ.get(
-        "CORS_ALLOWED_ORIGINS", "https://TalentLink-frontenddomain.com"
-    ).split(",")
+    cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS")
+    if cors_origins:
+        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(",")]
+    else:
+        CORS_ALLOWED_ORIGINS = ["https://TalentLink-frontenddomain.com"]
+
+# =========================
+# LOGGING
+# =========================
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "ERROR",
+    },
+}
 
 # =========================
 # INSTALLED APPS
@@ -102,10 +121,10 @@ INSTALLED_APPS = [
 # =========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # MUST be near top
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "myapp.middleware.VerifyFrontendTokenMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -179,7 +198,9 @@ USE_I18N = True
 USE_TZ = True
 
 # =========================
-# DEBUG: Print database & hosts
+# DEBUG INFO
 # =========================
-print("Using database:", DATABASES["default"].get("NAME"))
-print("Allowed hosts:", ALLOWED_HOSTS)
+print("DEBUG:", DEBUG)
+print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
+print("SECURE_SSL_REDIRECT:", SECURE_SSL_REDIRECT)
+print("Database NAME:", DATABASES["default"].get("NAME"))

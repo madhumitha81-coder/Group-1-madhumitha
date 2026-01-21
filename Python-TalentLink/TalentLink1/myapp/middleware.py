@@ -6,8 +6,9 @@ class VerifyFrontendTokenMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        token = request.headers.get("X-Frontend-Token")
-        # Check if token matches
-        if token != settings.FRONTEND_ACCESS_TOKEN:
-            return JsonResponse({"error": "Unauthorized"}, status=401)
+        # Only enforce for API paths
+        if request.path.startswith("/api/" and "/admin/"):
+            token = request.headers.get("X-Frontend-Token")
+            if token != settings.FRONTEND_ACCESS_TOKEN:
+                return JsonResponse({"error": "Unauthorized"}, status=401)
         return self.get_response(request)

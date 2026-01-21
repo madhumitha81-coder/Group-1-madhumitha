@@ -27,6 +27,38 @@ from .filters import ProjectFilter
 
 def home_view(request):
     return render(request, "home.html")
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_login(request):
+    username = request.data.get("username")
+    password = request.data.get("password")
+    user = authenticate(request, username=username, password=password)
+    if user:
+        login(request, user)
+        return Response({"success": "Logged in"})
+    return Response({"error": "Unauthorized"}, status=401)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_register(request):
+    username = request.data.get("username")
+    password = request.data.get("password")
+    email = request.data.get("email")
+    role = request.data.get("role", "freelancer")
+
+    if User.objects.filter(username=username).exists():
+        return Response({"error": "Username exists"}, status=400)
+
+    user = User.objects.create_user(username=username, password=password, email=email)
+    user.profile.role = role
+    user.profile.save()
+    return Response({"success": "User created"})
 
 
 # ===========================
@@ -84,32 +116,23 @@ def root_redirect(request):
 # ===========================
 # CLIENT DASHBOARD
 # ===========================
-from django.db.models import Sum
-from django.contrib.auth.decorators import login_required
-from .decorators import client_required
-
-from django.db.models import Sum
-
+@login_required
+@client_required
 def client_dashboard(request):
     user = request.user
     profile = user.profile
 
-    # Projects created by client
     projects = Project.objects.filter(client=user)
-
-    # Proposals for client's projects
     proposals = Proposal.objects.filter(project__client=user)
 
-    # Contracts for this client
     contracts = Contract.objects.filter(client=profile).select_related(
         "project", "freelancer"
     )
 
-    # Notifications
     notifications = Notification.objects.filter(user=user).order_by("-created_at")
     unread_count = notifications.filter(is_read=False).count()
 
-    # Reviews for each contract
+    # ✅ Store reviews per contract
     contract_reviews = {}
     for contract in contracts:
         review = Review.objects.filter(
@@ -120,6 +143,7 @@ def client_dashboard(request):
 
     context = {
         "projects": projects,
+        "proposals": proposals,
         "contracts": contracts,
         "contract_reviews": contract_reviews,
         "notifications": notifications,
@@ -127,7 +151,6 @@ def client_dashboard(request):
     }
 
     return render(request, "client_dashboard.html", context)
-
 
 # ===========================
 # FREELANCER DASHBOARD

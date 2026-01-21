@@ -123,27 +123,6 @@ th, td { padding: 14px; border-bottom: 1px solid #334155; }
 .notification-card { background: #020617; padding: 12px 18px; border-radius: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 .notification-card.unread { border-left: 4px solid #22c55e; }
 .btn.green { background: #22c55e; color: #022c22; padding: 6px 12px; border-radius: 12px; text-decoration: none; font-weight: bold; }
-.alert {
-    padding: 14px 18px;
-    margin-bottom: 16px;
-    border-radius: 14px;
-    font-weight: 700;
-}
-
-.alert.success {
-    background: #22c55e;
-    color: #022c22;
-}
-
-.alert.error {
-    background: #ef4444;
-    color: #020617;
-}
-
-.alert.info {
-    background: #38bdf8;
-    color: #020617;
-}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width: 900px){
@@ -171,14 +150,6 @@ th, td { padding: 14px; border-bottom: 1px solid #334155; }
 
 <!-- CONTENT -->
 <div class="content">
-<!-- DJANGO MESSAGES -->
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert {{ message.tags }}">
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endif %}
 
 <!-- PROFILE -->
 <div class="profile" >
@@ -602,6 +573,5 @@ function deleteAllNotifications() {
 
 
 <!-- PROPOSALS -->
-
 
 

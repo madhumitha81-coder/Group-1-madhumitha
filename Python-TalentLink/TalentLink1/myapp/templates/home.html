@@ -112,6 +112,17 @@ footer {
     font-size: 14px;
     color: #475569;
 }
+
+/* --- PROJECTS PREVIEW --- */
+#projects-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+#projects-list .card h3 {
+    font-size: 20px;
+}
 </style>
 </head>
 <body>
@@ -199,9 +210,50 @@ footer {
     </div>
 </section>
 
+<!-- PROJECTS PREVIEW -->
+<section>
+    <h2>Recent Projects</h2>
+    <div id="projects-list"></div>
+</section>
+
 <footer>
     &copy; 2026 TalentLink
 </footer>
+
+<script>
+async function fetchProjects() {
+  try {
+    const response = await fetch("http://localhost:8000/api/projects/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Frontend-Token": "dev-token"
+      },
+      credentials: "include"
+    });
+    const data = await response.json();
+
+    if (response.ok) {
+      const container = document.getElementById("projects-list");
+      container.innerHTML = data.map(p => `
+        <div class="card">
+          <h3>${p.title}</h3>
+          <p>${p.description}</p>
+          <p><strong>Budget:</strong> $${p.budget || "N/A"}</p>
+          <p><strong>Deadline:</strong> ${p.deadline || "N/A"}</p>
+        </div>
+      `).join('');
+    } else {
+      console.error("Error fetching projects:", data);
+      alert(data.error || "Unauthorized access");
+    }
+  } catch (err) {
+    console.error("Network error:", err);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", fetchProjects);
+</script>
 
 </body>
 </html>

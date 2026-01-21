@@ -16,7 +16,7 @@ FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 # SECURITY
 # =========================
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS", "localhost,127.0.0.1,talentlink-backend.onrender.com"
@@ -25,7 +25,6 @@ ALLOWED_HOSTS = os.environ.get(
 # =========================
 # DATABASE CONFIG
 # =========================
-# Local fallback database
 LOCAL_DATABASE = {
     'ENGINE': 'django.db.backends.postgresql',
     'NAME': 'demo',
@@ -35,7 +34,6 @@ LOCAL_DATABASE = {
     'PORT': '5432',
 }
 
-# dj-database-url config (uses DATABASE_URL if set, else local)
 DATABASES = {
     "default": dj_database_url.config(
         default=f"postgres://{LOCAL_DATABASE['USER']}:{LOCAL_DATABASE['PASSWORD']}@{LOCAL_DATABASE['HOST']}:{LOCAL_DATABASE['PORT']}/{LOCAL_DATABASE['NAME']}",
@@ -43,9 +41,11 @@ DATABASES = {
     )
 }
 
-# SSL for production (Render)
+# Use SSL in production only
 if not DEBUG:
     DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+else:
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'disable'}  # <-- important for local dev
 
 # =========================
 # INSTALLED APPS
@@ -57,14 +57,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # Third-party apps
     "django_filters",
     "rest_framework",
     "corsheaders",
     "rest_framework.authtoken",
-
-    # Your apps
     "myapp.apps.MyappConfig",
 ]
 
@@ -108,7 +104,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "TalentLink.wsgi.application"
 
 # =========================
-# STATIC & MEDIA FILES
+# STATIC & MEDIA
 # =========================
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -118,13 +114,13 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # =========================
-# AUTH SETTINGS
+# AUTH
 # =========================
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 
 # =========================
-# DJANGO REST FRAMEWORK
+# REST FRAMEWORK
 # =========================
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
@@ -154,20 +150,16 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
+if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-else:
-    SECURE_SSL_REDIRECT = False
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
 
 # =========================
 # TIMEZONE & LANGUAGE
@@ -178,6 +170,6 @@ USE_I18N = True
 USE_TZ = True
 
 # =========================
-# DEBUG: Print current database (optional)
+# DEBUG: Print database
 # =========================
 print("Using database:", DATABASES['default'].get('NAME'))

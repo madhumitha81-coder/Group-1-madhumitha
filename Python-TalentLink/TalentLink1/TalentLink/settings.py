@@ -18,11 +18,14 @@ FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-
-
-# ALLOWED_HOSTS for Django deployment on Render
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-
+# =========================
+# ALLOWED HOSTS
+# =========================
+# Add your Render domain to ALLOWED_HOSTS
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1,group-1-madhumitha.onrender.com"
+).split(",")
 
 # =========================
 # DATABASE CONFIG
@@ -47,7 +50,7 @@ DATABASES = {
 if not DEBUG:
     DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 else:
-    DATABASES['default']['OPTIONS'] = {'sslmode': 'disable'}  # <-- important for local dev
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'disable'}
 
 # =========================
 # INSTALLED APPS

@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 import dj_database_url
@@ -18,11 +17,9 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 # ALLOWED HOSTS
 # =========================
 if DEBUG:
-    # Allow localhost & 127.0.0.1 in dev
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 else:
-    # Use your production domain in Render
-    ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com"]
+    ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com", ".onrender.com"]
 
 # =========================
 # DATABASE CONFIG
@@ -51,16 +48,22 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-SECURE_SSL_REDIRECT = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+# Trust Render's proxy for SSL
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+else:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 # =========================
 # FRONTEND TOKEN
@@ -73,11 +76,9 @@ FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = ["https://TalentLink-frontenddomain.com"]
-
-# =========================
-# OTHER SETTINGS (INSTALLED_APPS, MIDDLEWARE, TEMPLATES, STATIC, REST FRAMEWORK, etc.)
-# Keep the rest as you already have
+    CORS_ALLOWED_ORIGINS = os.environ.get(
+        "CORS_ALLOWED_ORIGINS", "https://TalentLink-frontenddomain.com"
+    ).split(",")
 
 # =========================
 # INSTALLED APPS
@@ -170,21 +171,6 @@ REST_FRAMEWORK = {
 }
 
 # =========================
-# CORS
-# =========================
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    CORS_ALLOWED_ORIGINS = os.environ.get(
-        "CORS_ALLOWED_ORIGINS", "https://TalentLink-frontenddomain.com"
-    ).split(",")
-
-# =========================
-# HTTPS / SECURITY
-# =========================
-
-
-# =========================
 # TIMEZONE & LANGUAGE
 # =========================
 LANGUAGE_CODE = "en-us"
@@ -193,7 +179,7 @@ USE_I18N = True
 USE_TZ = True
 
 # =========================
-# DEBUG: Print database
+# DEBUG: Print database & hosts
 # =========================
 print("Using database:", DATABASES["default"].get("NAME"))
 print("Allowed hosts:", ALLOWED_HOSTS)

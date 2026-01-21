@@ -18,9 +18,17 @@ FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
+
+
+# ALLOWED_HOSTS for Django deployment on Render
 ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS", "localhost,127.0.0.1,talentlink-backend.onrender.com"
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1,group-1-madhumitha.onrender.com"
 ).split(",")
+
+# Optional: print to debug (only in DEBUG mode)
+if os.environ.get("DEBUG", "True") == "True":
+    print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 
 # =========================
 # DATABASE CONFIG

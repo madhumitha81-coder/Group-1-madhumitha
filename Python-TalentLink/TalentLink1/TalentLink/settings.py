@@ -1,3 +1,4 @@
+
 import os
 from pathlib import Path
 import dj_database_url
@@ -11,14 +12,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY / DEBUG
 # =========================
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 # =========================
 # ALLOWED HOSTS
 # =========================
 if DEBUG:
+    # Allow localhost & 127.0.0.1 in dev
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 else:
+    # Use your production domain in Render
     ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com"]
 
 # =========================
@@ -52,9 +55,6 @@ SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
-# Respect proxy headers (important on Render)
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
 if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -76,7 +76,11 @@ else:
     CORS_ALLOWED_ORIGINS = ["https://TalentLink-frontenddomain.com"]
 
 # =========================
-# OTHER SETTINGS
+# OTHER SETTINGS (INSTALLED_APPS, MIDDLEWARE, TEMPLATES, STATIC, REST FRAMEWORK, etc.)
+# Keep the rest as you already have
+
+# =========================
+# INSTALLED APPS
 # =========================
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -92,6 +96,9 @@ INSTALLED_APPS = [
     "myapp.apps.MyappConfig",
 ]
 
+# =========================
+# MIDDLEWARE
+# =========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -105,6 +112,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# =========================
+# URLS & TEMPLATES
+# =========================
 ROOT_URLCONF = "TalentLink.urls"
 
 TEMPLATES = [
@@ -125,6 +135,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "TalentLink.wsgi.application"
 
+# =========================
+# STATIC & MEDIA
+# =========================
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -132,11 +145,19 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# =========================
+# AUTH
+# =========================
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 
+# =========================
+# REST FRAMEWORK
+# =========================
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
@@ -148,13 +169,31 @@ REST_FRAMEWORK = {
     ],
 }
 
+# =========================
+# CORS
+# =========================
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = os.environ.get(
+        "CORS_ALLOWED_ORIGINS", "https://TalentLink-frontenddomain.com"
+    ).split(",")
+
+# =========================
+# HTTPS / SECURITY
+# =========================
+
+
+# =========================
+# TIMEZONE & LANGUAGE
+# =========================
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
 # =========================
-# DEBUG PRINTS
+# DEBUG: Print database
 # =========================
 print("Using database:", DATABASES["default"].get("NAME"))
 print("Allowed hosts:", ALLOWED_HOSTS)

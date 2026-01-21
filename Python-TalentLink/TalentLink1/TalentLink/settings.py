@@ -1,3 +1,4 @@
+
 import os
 from pathlib import Path
 import dj_database_url
@@ -8,12 +9,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # =========================
-# FRONTEND ACCESS TOKEN
-# =========================
-FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
-
-# =========================
-# SECURITY
+# SECURITY / DEBUG
 # =========================
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
@@ -21,22 +17,23 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 # =========================
 # ALLOWED HOSTS
 # =========================
-# Add your Render domain to ALLOWED_HOSTS
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-    "localhost,127.0.0.1,group-1-madhumitha.onrender.com"
-).split(",")
+if DEBUG:
+    # Allow localhost & 127.0.0.1 in dev
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+else:
+    # Use your production domain in Render
+    ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com"]
 
 # =========================
 # DATABASE CONFIG
 # =========================
 LOCAL_DATABASE = {
-    'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'demo',
-    'USER': 'postgres',
-    'PASSWORD': 'madhumitha@81',
-    'HOST': 'localhost',
-    'PORT': '5432',
+    "ENGINE": "django.db.backends.postgresql",
+    "NAME": "demo",
+    "USER": "postgres",
+    "PASSWORD": "madhumitha@81",
+    "HOST": "localhost",
+    "PORT": "5432",
 }
 
 DATABASES = {
@@ -46,11 +43,41 @@ DATABASES = {
     )
 }
 
-# Use SSL in production only
 if not DEBUG:
-    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+    DATABASES["default"]["OPTIONS"] = {"sslmode": "require"}
 else:
-    DATABASES['default']['OPTIONS'] = {'sslmode': 'disable'}
+    DATABASES["default"]["OPTIONS"] = {"sslmode": "disable"}
+
+# =========================
+# HTTPS / SECURITY
+# =========================
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# =========================
+# FRONTEND TOKEN
+# =========================
+FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
+
+# =========================
+# CORS
+# =========================
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = ["https://TalentLink-frontenddomain.com"]
+
+# =========================
+# OTHER SETTINGS (INSTALLED_APPS, MIDDLEWARE, TEMPLATES, STATIC, REST FRAMEWORK, etc.)
+# Keep the rest as you already have
 
 # =========================
 # INSTALLED APPS
@@ -155,16 +182,7 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-SECURE_SSL_REDIRECT = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
 
-if not DEBUG:
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # =========================
 # TIMEZONE & LANGUAGE
@@ -177,4 +195,5 @@ USE_TZ = True
 # =========================
 # DEBUG: Print database
 # =========================
-print("Using database:", DATABASES['default'].get('NAME'))
+print("Using database:", DATABASES["default"].get("NAME"))
+print("Allowed hosts:", ALLOWED_HOSTS)

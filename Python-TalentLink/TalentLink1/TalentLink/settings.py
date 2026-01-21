@@ -105,7 +105,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "TalentLink1.TalentLink.wsgi.application"
+WSGI_APPLICATION = "TalentLink.wsgi.application"
 
 # =========================
 # STATIC & MEDIA FILES

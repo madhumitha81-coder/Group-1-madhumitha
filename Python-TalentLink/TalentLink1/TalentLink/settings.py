@@ -22,7 +22,7 @@ else:
     ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com", ".onrender.com"]
 
 # =========================
-# CSRF
+# CSRF TRUSTED ORIGINS
 # =========================
 if not DEBUG:
     CSRF_TRUSTED_ORIGINS = [
@@ -67,8 +67,9 @@ else:
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG:
+    # Temporarily disable redirect to avoid loops on Render
     SECURE_SSL_REDIRECT = False
-    SESSION_COOKIE_SECURE =False
+    SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -131,7 +132,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    # "myapp.middleware.VerifyFrontendTokenMiddleware",  # temporarily disable if causing 500
+    # "myapp.middleware.VerifyFrontendTokenMiddleware",  # comment temporarily if causing 500
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

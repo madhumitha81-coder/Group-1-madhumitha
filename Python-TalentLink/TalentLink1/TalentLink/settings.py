@@ -65,9 +65,7 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-SECURE_SSL_REDIRECT = not DEBUG  # always True in production
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
@@ -75,12 +73,30 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # =========================
+# COOKIE SETTINGS (prevent redirect/cookie loops)
+# =========================
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_DOMAIN = ".onrender.com"
+    CSRF_COOKIE_DOMAIN = ".onrender.com"
+    SESSION_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SAMESITE = "Lax"
+else:
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_DOMAIN = None
+    CSRF_COOKIE_DOMAIN = None
+    SESSION_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SAMESITE = "Lax"
+
+# =========================
 # FRONTEND TOKEN
 # =========================
 FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 
 # =========================
-# CORS
+# INSTALLED APPS
 # =========================
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -96,6 +112,9 @@ INSTALLED_APPS = [
     "myapp.apps.MyappConfig",
 ]
 
+# =========================
+# CORS CONFIG
+# =========================
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
@@ -113,7 +132,6 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",   # must be above CORS
     "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    # "myapp.middleware.VerifyFrontendTokenMiddleware",  # keep disabled until login works
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

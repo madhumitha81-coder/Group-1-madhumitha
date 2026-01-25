@@ -76,7 +76,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # COOKIE SETTINGS (prevent redirect/cookie loops)
 # =========================
 if not DEBUG:
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_DOMAIN = ".onrender.com"
     CSRF_COOKIE_DOMAIN = ".onrender.com"

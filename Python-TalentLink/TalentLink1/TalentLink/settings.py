@@ -1,20 +1,18 @@
+
 import os
 from pathlib import Path
 import dj_database_url
 
-# =========================
-# BASE DIR
-# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # =========================
 # SECURITY / DEBUG
 # =========================
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get("DEBUG", "True") == "True"  # True for local dev
 
 # =========================
-# TRUST RENDER PROXY (Fix redirect loops)
+# TRUST RENDER PROXY
 # =========================
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -41,50 +39,53 @@ if not DEBUG:
 # =========================
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-if DATABASE_URL:
-    # Production (Render)
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True,  # SSL required in production
-        )
-    }
-else:
+if DEBUG:
     # Local development
     DATABASES = {
         "default": dj_database_url.config(
             default="postgres://postgres:madhumitha%4081@localhost:5432/demo",
             conn_max_age=600,
-            ssl_require=False,  # SSL not used locally
+            ssl_require=False,  # Local DB does NOT use SSL
+        )
+    }
+else:
+    # Production (Render)
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,   # Must be set in Render Environment
+            conn_max_age=600,
+            ssl_require=True,       # Render requires SSL
         )
     }
 
 # =========================
 # HTTPS / SECURITY
 # =========================
-if not DEBUG:
-    # Production (Render)
-    SECURE_SSL_REDIRECT = False      # redirect HTTP → HTTPS
-    SESSION_COOKIE_SECURE = True      # secure cookies
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-else:
-    # Local development
-    SECURE_SSL_REDIRECT = False
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
-
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SAMESITE = "Lax"
+
+# =========================
+# COOKIE SETTINGS
+# =========================
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SAMESITE = "Lax"
+else:
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SAMESITE = "Lax"
 
 SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_DOMAIN = None
 
+    
 # =========================
 # FRONTEND TOKEN
 # =========================

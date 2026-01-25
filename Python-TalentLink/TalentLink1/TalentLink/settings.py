@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 import dj_database_url
-print("DATABASE_URL:", os.environ.get("DATABASE_URL"))
 
 # =========================
 # BASE DIR
@@ -18,7 +17,7 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 # TRUST RENDER PROXY (Fix redirect loops)
 # =========================
 USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # critical for Render
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # =========================
 # ALLOWED HOSTS
@@ -43,16 +42,16 @@ if not DEBUG:
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
-    # Render / Production
+    
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=False,  # <-- disable SSL locally
         )
     }
+
 else:
-    # Local development ONLY
     DATABASES = {
         "default": dj_database_url.config(
             default="postgres://postgres:madhumitha%4081@localhost:5432/demo",
@@ -60,11 +59,10 @@ else:
         )
     }
 
-
 # =========================
 # HTTPS / SECURITY
 # =========================
-
+SECURE_SSL_REDIRECT = not DEBUG  # Redirect HTTP to HTTPS in production
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
@@ -72,23 +70,21 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # =========================
-# COOKIE SETTINGS (prevent redirect/cookie loops)
+# COOKIE SETTINGS
 # =========================
 if not DEBUG:
-    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False  # must be True in production
     CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_DOMAIN = None
-    CSRF_COOKIE_DOMAIN = None
     SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SAMESITE = "Lax"
-
 else:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_DOMAIN = None
-    CSRF_COOKIE_DOMAIN = None
     SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SAMESITE = "Lax"
+
+SESSION_COOKIE_DOMAIN = None
+CSRF_COOKIE_DOMAIN = None
 
 # =========================
 # FRONTEND TOKEN
@@ -125,11 +121,11 @@ else:
         CORS_ALLOWED_ORIGINS = ["https://group-1-madhumitha.onrender.com"]
 
 # =========================
-# MIDDLEWARE (correct order)
+# MIDDLEWARE
 # =========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",   # must be above CORS
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -213,11 +209,9 @@ LOGGING = {
 }
 
 # =========================
-# DEBUG INFO (temporary)
+# DEBUG INFO
 # =========================
 if DEBUG:
-
     print("DEBUG:", DEBUG)
     print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
-
     print("Database NAME:", DATABASES["default"].get("NAME"))

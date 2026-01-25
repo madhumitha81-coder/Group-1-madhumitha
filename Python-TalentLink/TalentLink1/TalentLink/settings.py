@@ -19,9 +19,10 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 if DEBUG:
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 else:
-    # Replace with your Render URL and any custom domains
-    ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com", "TalentLink-frontenddomain.com"]
-#
+    ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com", ".onrender.com"]
+
+# =========================
+# CSRF
 # =========================
 if not DEBUG:
     CSRF_TRUSTED_ORIGINS = [
@@ -32,23 +33,29 @@ if not DEBUG:
 # =========================
 # DATABASE CONFIG
 # =========================
-LOCAL_DATABASE = {
-    "ENGINE": "django.db.backends.postgresql",
-    "NAME": "demo",
-    "USER": "postgres",
-    "PASSWORD": "madhumitha@81",
-    "HOST": "localhost",
-    "PORT": "5432",
-}
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    }
+else:
+    # fallback for local development
+    LOCAL_DATABASE = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "demo",
+        "USER": "postgres",
+        "PASSWORD": "madhumitha@81",
+        "HOST": "localhost",
+        "PORT": "5432",
+    }
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=f"postgres://{LOCAL_DATABASE['USER']}:{LOCAL_DATABASE['PASSWORD']}@{LOCAL_DATABASE['HOST']}:{LOCAL_DATABASE['PORT']}/{LOCAL_DATABASE['NAME']}",
+            conn_max_age=600,
+        )
+    }
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"postgres://{LOCAL_DATABASE['USER']}:{LOCAL_DATABASE['PASSWORD']}@{LOCAL_DATABASE['HOST']}:{LOCAL_DATABASE['PORT']}/{LOCAL_DATABASE['NAME']}",
-        conn_max_age=600,
-    )
-}
-
-# Use SSL in production
+# SSL for production
 if not DEBUG:
     DATABASES["default"]["OPTIONS"] = {"sslmode": "require"}
 else:
@@ -57,12 +64,10 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-# Trust Render's proxy for HTTPS
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = False # temporarily disable to test
-
+    SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
@@ -98,13 +103,8 @@ else:
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "ERROR",
-    },
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "ERROR"},
 }
 
 # =========================
@@ -129,9 +129,9 @@ INSTALLED_APPS = [
 # =========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # MUST be near top
+    "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "myapp.middleware.VerifyFrontendTokenMiddleware",
+    # "myapp.middleware.VerifyFrontendTokenMiddleware",  # temporarily disable if causing 500
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -183,9 +183,7 @@ LOGIN_REDIRECT_URL = "/"
 # REST FRAMEWORK
 # =========================
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
@@ -206,9 +204,10 @@ USE_I18N = True
 USE_TZ = True
 
 # =========================
-# DEBUG INFO
+# DEBUG INFO (temporary)
 # =========================
-print("DEBUG:", DEBUG)
-print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
-print("SECURE_SSL_REDIRECT:", SECURE_SSL_REDIRECT)
-print("Database NAME:", DATABASES["default"].get("NAME"))
+if DEBUG:
+    print("DEBUG:", DEBUG)
+    print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
+    print("SECURE_SSL_REDIRECT:", SECURE_SSL_REDIRECT)
+    print("Database NAME:", DATABASES["default"].get("NAME"))

@@ -64,13 +64,15 @@ else:
 # HTTPS / SECURITY
 # =========================
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
+    # Production (Render)
+    SECURE_SSL_REDIRECT = False      # redirect HTTP → HTTPS
+    SESSION_COOKIE_SECURE = True      # secure cookies
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 else:
+    # Local development
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False

@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 import dj_database_url
@@ -12,7 +11,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
 DEBUG = os.environ.get("DEBUG", "True") == "True"  # True for local dev
 
 # =========================
-# TRUST RENDER PROXY
+# TRUST RENDER PROXY (fix redirect loops)
 # =========================
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -40,7 +39,6 @@ if not DEBUG:
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DEBUG:
-    # Local development
     DATABASES = {
         "default": dj_database_url.config(
             default="postgres://postgres:madhumitha%4081@localhost:5432/demo",
@@ -49,19 +47,20 @@ if DEBUG:
         )
     }
 else:
-    # Production (Render)
     DATABASES = {
         "default": dj_database_url.config(
-            default=DATABASE_URL,   # Must be set in Render Environment
+            default=DATABASE_URL,  # Render environment variable
             conn_max_age=600,
-            ssl_require=True,       # Render requires SSL
+            ssl_require=True,      # Render requires SSL
         )
     }
 
 # =========================
 # HTTPS / SECURITY
 # =========================
-SECURE_SSL_REDIRECT = not DEBUG
+# On Render, avoid redirect loop by checking if DEBUG is False
+SECURE_SSL_REDIRECT = False if DEBUG else True
+
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
@@ -71,29 +70,14 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # =========================
 # COOKIE SETTINGS
 # =========================
-# =========================
-# HTTPS / SECURITY
-# =========================
-if not DEBUG:
-    # Trust Render's HTTPS proxy
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    USE_X_FORWARDED_HOST = True
-
-    # Only redirect if request is HTTP externally
-    SECURE_SSL_REDIRECT = True
-
-    # Cookies over HTTPS
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-else:
-    SECURE_SSL_REDIRECT = False
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
 SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_DOMAIN = None
 
-    
 # =========================
 # FRONTEND TOKEN
 # =========================

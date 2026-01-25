@@ -21,6 +21,13 @@ if DEBUG:
 else:
     # Replace with your Render URL and any custom domains
     ALLOWED_HOSTS = ["group-1-madhumitha.onrender.com", "TalentLink-frontenddomain.com"]
+#
+# =========================
+if not DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://group-1-madhumitha.onrender.com",
+        "https://*.onrender.com"
+    ]
 
 # =========================
 # DATABASE CONFIG

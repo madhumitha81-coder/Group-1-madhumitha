@@ -38,22 +38,31 @@ if not DEBUG:
 # =========================
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# =========================
+# DATABASE CONFIG
+# =========================
+import sys
+
 if DEBUG:
     DATABASES = {
         "default": dj_database_url.config(
             default="postgres://postgres:madhumitha%4081@localhost:5432/demo",
             conn_max_age=600,
-            ssl_require=False,  # Local DB does NOT use SSL
+            ssl_require=False,
         )
     }
 else:
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    if not DATABASE_URL:
+        sys.exit("Error: DATABASE_URL environment variable not set in production!")
     DATABASES = {
         "default": dj_database_url.config(
-            default=DATABASE_URL,  # Render environment variable
+            default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,      # Render requires SSL
+            ssl_require=True,  # Render requires SSL
         )
     }
+
 
 # =========================
 # HTTPS / SECURITY

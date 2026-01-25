@@ -14,15 +14,6 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 # =========================
-# SSL Redirect Fix for Render
-# =========================
-# Default: enable SSL redirect in production
-SECURE_SSL_REDIRECT = not DEBUG
-if not DEBUG:
-    # Allow temporary disable via environment variable to prevent login 500
-    SECURE_SSL_REDIRECT = os.environ.get("DISABLE_SSL_REDIRECT", "False") != "True"
-
-# =========================
 # ALLOWED HOSTS
 # =========================
 if DEBUG:
@@ -69,19 +60,17 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # tells Django to trust Render proxy
 
-if not DEBUG:
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-else:
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
+# Permanent SSL redirect for production
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # =========================
 # FRONTEND TOKEN
@@ -119,10 +108,10 @@ else:
 # =========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",   # <-- move above CORS
+    "django.contrib.sessions.middleware.SessionMiddleware",   # must be above CORS
     "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    # "myapp.middleware.VerifyFrontendTokenMiddleware",  # keep disabled for login
+    # "myapp.middleware.VerifyFrontendTokenMiddleware",  # keep disabled until login works
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

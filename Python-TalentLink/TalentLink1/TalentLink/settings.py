@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import dj_database_url
+print("DATABASE_URL:", os.environ.get("DATABASE_URL"))
 
 # =========================
 # BASE DIR
@@ -215,6 +216,7 @@ LOGGING = {
 # DEBUG INFO (temporary)
 # =========================
 if DEBUG:
+
     print("DEBUG:", DEBUG)
     print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 

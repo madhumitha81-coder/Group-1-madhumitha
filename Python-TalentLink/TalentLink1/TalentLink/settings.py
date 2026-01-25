@@ -42,46 +42,43 @@ if not DEBUG:
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
-    
+    # Production (Render)
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=False,  # <-- disable SSL locally
+            ssl_require=True,  # SSL required in production
         )
     }
-
 else:
+    # Local development
     DATABASES = {
         "default": dj_database_url.config(
             default="postgres://postgres:madhumitha%4081@localhost:5432/demo",
             conn_max_age=600,
+            ssl_require=False,  # SSL not used locally
         )
     }
 
 # =========================
 # HTTPS / SECURITY
 # =========================
-SECURE_SSL_REDIRECT = not DEBUG  # Redirect HTTP to HTTPS in production
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-
-# =========================
-# COOKIE SETTINGS
-# =========================
 if not DEBUG:
-    SESSION_COOKIE_SECURE = False  # must be True in production
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SAMESITE = "Lax"
-    CSRF_COOKIE_SAMESITE = "Lax"
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 else:
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SAMESITE = "Lax"
-    CSRF_COOKIE_SAMESITE = "Lax"
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
 SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_DOMAIN = None

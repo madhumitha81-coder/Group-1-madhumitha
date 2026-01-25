@@ -65,7 +65,7 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-SECURE_SSL_REDIRECT = not DEBUG
+
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
@@ -218,5 +218,5 @@ LOGGING = {
 if DEBUG:
     print("DEBUG:", DEBUG)
     print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
-    print("SECURE_SSL_REDIRECT:", SECURE_SSL_REDIRECT)
+
     print("Database NAME:", DATABASES["default"].get("NAME"))

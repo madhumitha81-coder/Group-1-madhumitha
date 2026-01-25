@@ -11,7 +11,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY / DEBUG
 # =========================
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+
+# =========================
+# SSL Redirect Fix for Render
+# =========================
+# Default: enable SSL redirect in production
+SECURE_SSL_REDIRECT = not DEBUG
+if not DEBUG:
+    # Allow temporary disable via environment variable to prevent login 500
+    SECURE_SSL_REDIRECT = os.environ.get("DISABLE_SSL_REDIRECT", "False") != "True"
 
 # =========================
 # ALLOWED HOSTS
@@ -36,7 +45,9 @@ if not DEBUG:
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+        "default": dj_database_url.config(
+            default=DATABASE_URL, conn_max_age=600, ssl_require=True
+        )
     }
 else:
     # fallback for local development
@@ -55,29 +66,20 @@ else:
         )
     }
 
-# SSL for production
-if not DEBUG:
-    DATABASES["default"]["OPTIONS"] = {"sslmode": "require"}
-else:
-    DATABASES["default"]["OPTIONS"] = {"sslmode": "disable"}
-
 # =========================
 # HTTPS / SECURITY
 # =========================
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG:
-    # Temporarily disable redirect to avoid loops on Render
-    SECURE_SSL_REDIRECT = False
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 else:
-    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 
@@ -88,28 +90,6 @@ FRONTEND_ACCESS_TOKEN = os.environ.get("FRONTEND_ACCESS_TOKEN", "dev-token")
 
 # =========================
 # CORS
-# =========================
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS")
-    if cors_origins:
-        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(",")]
-    else:
-        CORS_ALLOWED_ORIGINS = ["https://TalentLink-frontenddomain.com"]
-
-# =========================
-# LOGGING
-# =========================
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "root": {"handlers": ["console"], "level": "ERROR"},
-}
-
-# =========================
-# INSTALLED APPS
 # =========================
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -125,15 +105,24 @@ INSTALLED_APPS = [
     "myapp.apps.MyappConfig",
 ]
 
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    cors_origins = os.environ.get("CORS_ALLOWED_ORIGINS")
+    if cors_origins:
+        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(",")]
+    else:
+        CORS_ALLOWED_ORIGINS = ["https://group-1-madhumitha.onrender.com"]
+
 # =========================
-# MIDDLEWARE
+# MIDDLEWARE (fixed order)
 # =========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",   # <-- move above CORS
     "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    # "myapp.middleware.VerifyFrontendTokenMiddleware",  # comment temporarily if causing 500
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    # "myapp.middleware.VerifyFrontendTokenMiddleware",  # keep disabled for login
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -203,6 +192,16 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
+
+# =========================
+# LOGGING
+# =========================
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "ERROR"},
+}
 
 # =========================
 # DEBUG INFO (temporary)

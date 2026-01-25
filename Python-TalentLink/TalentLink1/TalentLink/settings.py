@@ -59,21 +59,20 @@ else:
 # HTTPS / SECURITY
 # =========================
 # On Render, avoid redirect loop by checking if DEBUG is False
-SECURE_SSL_REDIRECT = False if DEBUG else True
+# Only redirect to HTTPS if request is not already secure
+if not DEBUG:
+    SECURE_SSL_REDIRECT = False   # Let Render handle HTTPS
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
+# Trust proxy headers
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# =========================
-# COOKIE SETTINGS
-# =========================
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SAMESITE = "Lax"
 
 SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_DOMAIN = None

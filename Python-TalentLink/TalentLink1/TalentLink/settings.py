@@ -14,6 +14,12 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 # =========================
+# TRUST RENDER PROXY (Fix redirect loops)
+# =========================
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # critical for Render
+
+# =========================
 # ALLOWED HOSTS
 # =========================
 if DEBUG:
@@ -41,7 +47,6 @@ if DATABASE_URL:
         )
     }
 else:
-    # fallback for local development
     LOCAL_DATABASE = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "demo",
@@ -60,10 +65,7 @@ else:
 # =========================
 # HTTPS / SECURITY
 # =========================
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # tells Django to trust Render proxy
-
-# Permanent SSL redirect for production
-SECURE_SSL_REDIRECT = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG  # always True in production
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
@@ -104,7 +106,7 @@ else:
         CORS_ALLOWED_ORIGINS = ["https://group-1-madhumitha.onrender.com"]
 
 # =========================
-# MIDDLEWARE (fixed order)
+# MIDDLEWARE (correct order)
 # =========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

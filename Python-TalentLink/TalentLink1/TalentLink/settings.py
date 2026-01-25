@@ -40,27 +40,25 @@ if not DEBUG:
 # DATABASE CONFIG
 # =========================
 DATABASE_URL = os.environ.get("DATABASE_URL")
+
 if DATABASE_URL:
+    # Render / Production
     DATABASES = {
         "default": dj_database_url.config(
-            default=DATABASE_URL, conn_max_age=600, ssl_require=True
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
         )
     }
 else:
-    LOCAL_DATABASE = {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "demo",
-        "USER": "postgres",
-        "PASSWORD": "madhumitha@81",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
+    # Local development ONLY
     DATABASES = {
         "default": dj_database_url.config(
-            default=f"postgres://{LOCAL_DATABASE['USER']}:{LOCAL_DATABASE['PASSWORD']}@{LOCAL_DATABASE['HOST']}:{LOCAL_DATABASE['PORT']}/{LOCAL_DATABASE['NAME']}",
+            default="postgres://postgres:madhumitha%4081@localhost:5432/demo",
             conn_max_age=600,
         )
     }
+
 
 # =========================
 # HTTPS / SECURITY

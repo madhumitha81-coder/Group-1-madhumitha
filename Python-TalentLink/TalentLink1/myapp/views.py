@@ -86,18 +86,24 @@ def register_view(request):
     return render(request, "register.html")
 
 
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
 def login_view(request):
     if request.method == "POST":
-        user = authenticate(
-            request,
-            username=request.POST["username"],
-            password=request.POST["password"]
-        )
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect("root_redirect")
-        messages.error(request, "Invalid credentials")
+            return redirect("home")
+        else:
+            messages.error(request, "Invalid credentials")
+
     return render(request, "login.html")
+
 
 
 @login_required

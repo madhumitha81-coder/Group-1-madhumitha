@@ -1,7 +1,5 @@
 import os
-import sys
 from pathlib import Path
-import dj_database_url
 
 # =========================
 # BASE DIR
@@ -9,56 +7,18 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # =========================
-# SECURITY / DEBUG
+# SECURITY
 # =========================
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key")
 
 DEBUG = os.environ.get("DEBUG", "True").lower() in ["true", "1", "yes"]
 
-# =========================
-# ALLOWED HOSTS
-# =========================
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "localhost:8000",
     "group-1-madhumitha.onrender.com",
     ".onrender.com",
 ]
-
-# =========================
-# CSRF
-# =========================
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "https://group-1-madhumitha.onrender.com",
-    "https://*.onrender.com",
-]
-
-# =========================
-# DATABASE
-# =========================
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-if DEBUG:
-    DATABASES = {
-        "default": dj_database_url.config(
-            default="postgres://postgres:madhumitha%4081@localhost:5432/demo",
-            conn_max_age=600,
-            ssl_require=False,
-        )
-    }
-else:
-    if not DATABASE_URL:
-        sys.exit("ERROR: DATABASE_URL not set")
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True,
-        )
-    }
 
 # =========================
 # APPLICATIONS
@@ -77,7 +37,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
 
-    # Local
+    # Local app
     "myapp.apps.MyappConfig",
 ]
 
@@ -96,20 +56,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-APPEND_SLASH = True
-
 # =========================
-# CORS
-# =========================
-CORS_ALLOW_ALL_ORIGINS = DEBUG
-
-if not DEBUG:
-    CORS_ALLOWED_ORIGINS = [
-        "https://group-1-madhumitha.onrender.com",
-    ]
-
-# =========================
-# URLS / TEMPLATES
+# URL CONFIG
 # =========================
 ROOT_URLCONF = "TalentLink.urls"
 
@@ -132,17 +80,55 @@ TEMPLATES = [
 WSGI_APPLICATION = "TalentLink.wsgi.application"
 
 # =========================
-# STATIC / MEDIA
+# DATABASE
+# =========================
+if DEBUG:
+    # Local PostgreSQL (pgAdmin)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "demo",
+            "USER": "postgres",
+            "PASSWORD": "madhumitha@81",
+            "HOST": "localhost",
+            "PORT": "5432",
+        }
+    }
+
+else:
+    # Render deployment (SQLite to avoid expired DB)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+# =========================
+# AUTH PASSWORD VALIDATORS
+# =========================
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+]
+
+# =========================
+# STATIC FILES
 # =========================
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # =========================
-# AUTH
+# LOGIN SETTINGS
 # =========================
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
@@ -161,44 +147,29 @@ REST_FRAMEWORK = {
 }
 
 # =========================
-# SECURITY (RENDER)
+# CORS
+# =========================
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+# =========================
+# RENDER SECURITY
 # =========================
 USE_X_FORWARDED_HOST = not DEBUG
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
-
-SESSION_COOKIE_DOMAIN = None
-CSRF_COOKIE_DOMAIN = None
 
 # =========================
 # LANGUAGE / TIMEZONE
 # =========================
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
+
 USE_I18N = True
 USE_TZ = True
 
 # =========================
-# LOGGING
+# DEFAULT AUTO FIELD
 # =========================
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "ERROR",
-    },
-}
-
-# =========================
-# DEBUG INFO
-# =========================
-if DEBUG:
-    print("DEBUG MODE ON")
-    print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

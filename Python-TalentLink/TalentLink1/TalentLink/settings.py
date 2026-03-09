@@ -20,6 +20,12 @@ ALLOWED_HOSTS = [
     ".onrender.com",
 ]
 
+# Fix CSRF error on Render
+CSRF_TRUSTED_ORIGINS = [
+    "https://group-1-madhumitha.onrender.com",
+    "https://*.onrender.com",
+]
+
 # =========================
 # APPLICATIONS
 # =========================
@@ -37,7 +43,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
 
-    # Local app
+    # Local
     "myapp.apps.MyappConfig",
 ]
 
@@ -94,9 +100,8 @@ if DEBUG:
             "PORT": "5432",
         }
     }
-
 else:
-    # Render deployment (SQLite to avoid expired DB)
+    # Render Deployment (SQLite)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -105,7 +110,7 @@ else:
     }
 
 # =========================
-# AUTH PASSWORD VALIDATORS
+# PASSWORD VALIDATION
 # =========================
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -152,18 +157,19 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 # =========================
-# RENDER SECURITY
+# SECURITY FOR RENDER
 # =========================
-USE_X_FORWARDED_HOST = not DEBUG
+USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
 # =========================
-# LANGUAGE / TIMEZONE
+# LANGUAGE
 # =========================
 LANGUAGE_CODE = "en-us"
+
 TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
